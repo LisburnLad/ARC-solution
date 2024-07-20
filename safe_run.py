@@ -29,6 +29,13 @@ TIME_LIMIT   = 9*60*60 * 0.95 # Seconds
 class Process:
     def __init__(self, cmd, timeout, maxmemory):
         fn = cmd.replace(' ','_')
+
+        # To get the filename without the extension:
+        if all_digits(fn) == False:
+          basename = os.path.basename(fn)
+          fn = os.path.splitext(basename)[0]
+          print(f"File name = {fn}")  # Output: filename
+
         self.fout = open('store/tmp/%s.out'%fn,'w')
         self.ferr = open('store/tmp/%s.err'%fn,'w')
         print(cmd)
@@ -128,16 +135,38 @@ def runAll(cmd_list, threads):
     return ret_stats
 
 
+def all_digits(input_string):
+    return input_string.isdigit()
+
 
 system("mkdir -p output")
 system("mkdir -p store/tmp")
 system("rm -f output/answer*.csv")
 
+
+filename = ""
+print(f"Number of args = {len(sys.argv)}")
 if len(sys.argv) == 3:
-    l = int(sys.argv[1])
-    n = int(sys.argv[2])
-    ntasks = n
-    task_list = range(l, l+n)
+    
+    # test if the supplied argument is a file index or a file path
+    file_index = all_digits(sys.argv[1])
+    print(f"Argument 1 = {sys.argv[1]} - integer = {file_index}")
+
+    if file_index:
+      l = int(sys.argv[1])
+      n = int(sys.argv[2])
+      ntasks = n
+      task_list = range(l, l+n)
+      print(f"Task List Length = {len(task_list)}")
+    else:
+      filename = sys.argv[1]
+      n = int(sys.argv[2])
+      ntasks = n
+      print(f"File path = {filename}" )      
+
+      basename = os.path.basename(filename)            
+      # task_list = os.path.splitext(basename)[0]
+      task_list = [-1]
 else:
     ntasks = int(check_output('./count_tasks'))
     task_list = range(0, ntasks)
@@ -145,26 +174,38 @@ else:
 
 #TODO: change back to depth 3/4
 depth3 = []
-for i in range(ntasks):
+if filename == "":
+  for i in range(ntasks):   
     depth3.append(Command("./run %d 3"%i))
+else:
+  depth3.append(Command(f"./run {filename} 3"))  
 stats3 = runAll(depth3, 4)
 
 flip3 = []
-for i in range(ntasks):
-    status, t, m = stats3[depth3[i].cmd]
-    flip3.append(Command("./run %d 23"%i, t*2, m*2, 100))
+if filename == "":
+  for i in range(ntasks):
+      status, t, m = stats3[depth3[i].cmd]
+      flip3.append(Command("./run %d 23"%i, t*2, m*2, 100))
+else:
+  flip3.append(Command(f"./run {filename} 23"))        
 stats3_flip = runAll(flip3, 4)
 
 flip3 = []
-for i in range(ntasks):
-    status, t, m = stats3[depth3[i].cmd]
-    flip3.append(Command("./run %d 33"%i, t*2, m*2, 100))
+if filename == "":
+  for i in range(ntasks):
+      status, t, m = stats3[depth3[i].cmd]
+      flip3.append(Command("./run %d 33"%i, t*2, m*2, 100))
+else:
+  flip3.append(Command(f"./run {filename} 33"))          
 runAll(flip3, 4)
 
 depth4 = []
-for i in range(ntasks):
-    status, t, m = stats3[depth3[i].cmd]
-    depth4.append(Command("./run %d 4"%i, t*20, m*20, 2))
+if filename == "":
+  for i in range(ntasks):
+      status, t, m = stats3[depth3[i].cmd]
+      depth4.append(Command("./run %d 4"%i, t*20, m*20, 2))
+else:
+  flip3.append(Command(f"./run {filename} 4"))          
 stats4 = runAll(depth4, 2)
 
 def read(fn):
@@ -177,7 +218,8 @@ combined = ["output_id,output"]
 for taski in task_list:
     ids = set()
     cands = []
-    for fn in glob("output/answer_%d_*.csv"%taski):
+    # for fn in glob("output/answer_%d_*.csv"%taski):
+    for fn in glob(f"output/answer_{taski}_*.csv"):
         t = read(fn).strip().split('\n')
         ids.add(t[0])
         for cand in t[1:]:

@@ -4,6 +4,7 @@
 #include <tuple>
 #include <cassert>
 #include <functional>*/
+
 #include "precompiled_stl.hpp"
 using namespace std;
 #include "utils.hpp"
@@ -68,9 +69,33 @@ void print(Image img) {
     for (int j = 0; j < img.w; j++) {
       int col = img(i,j);
       if (col)
-	printf("%d", col);
+	      printf("%d", col);
       else printf(".");
     }
     printf("\n");
   }
+}
+
+// write the supplied image to a file
+void write(Image img, const string& aFilename, const string& aDirectory) {
+
+  string filePath = aDirectory + aFilename;
+  ofstream filestream;
+  filestream.open(filePath.c_str(),ios::out);
+
+
+  // printf("[%d %d %d %d]\n", img.p.x, img.p.y, img.w, img.h);
+  for (int i = 0; i < img.h; i++) {
+    for (int j = 0; j < img.w; j++) {
+      if( j > 0 ) filestream << ",";
+      int col = img(i,j);
+      if (col)
+        filestream << col;
+      else
+        filestream << "0";
+    }
+    if( (i+1) < img.h ) filestream << endl;
+  }
+
+  filestream.close();
 }

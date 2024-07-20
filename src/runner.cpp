@@ -56,7 +56,8 @@ int MAXSIDE = 100, MAXAREA = 40*40, MAXPIXELS = 40*40*5; //Just default values
 
 int print_times = 1, print_mem = 1, print_nodes = 1;
 
-void run(int only_sid = -1, int arg = -1) {
+
+void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eval = 0) {
   //rankFeatures();
   //evalNormalizeRigid();
   //evalTasks();
@@ -72,23 +73,8 @@ void run(int only_sid = -1, int arg = -1) {
   if (arg == -1) arg = 2;
   MAXDEPTH = arg % 10 * 10;
 
-  int eval = 0;
 
   int skips = 0;
-
-  string sample_dir = "evaluation";
-  int samples = -1;
-  if (eval) {
-    sample_dir = "test";
-    samples = -1;
-  }
-
-  /*vector<Sample> sample = readAll("evaluation", -1);
-  samples = sample.size();
-  sample = vector<Sample>(sample.begin()+samples-100,sample.end());*/
-  vector<Sample> sample = readAll(sample_dir, samples);
-  //sample = vector<Sample>(sample.begin()+200, sample.begin()+300);
-
   int scores[4] = {};
 
   Visu visu;
@@ -98,8 +84,6 @@ void run(int only_sid = -1, int arg = -1) {
   int dones = 0;
   Loader load(sample.size());
 
-
-  assert(only_sid < sample.size());
   //Remember to fix Timers before running parallel
 
   for (int si = 0; si < sample.size(); si++) {
@@ -114,6 +98,8 @@ void run(int only_sid = -1, int arg = -1) {
 
     const Sample&s = sample[si];
 
+    cout << "Processing: " << s.id << endl;
+
     //Normalize sample
     Simplifier sim = normalizeCols(s.train);
     if (no_norm) sim = normalizeDummy(s.train);
@@ -122,24 +108,47 @@ void run(int only_sid = -1, int arg = -1) {
     for (auto&[in,out] : s.train) {
       train.push_back(sim(in,out));
     }
+
+    // the index of the image to write for testing
+    int testIndex = 1;
+    if( testIndex >= 0)
+    {
+      write(s.train[testIndex].first, "s_train_first.csv");
+      write(s.train[testIndex].second, "s_train_second.csv");
+      
+      cout << "Original Input" << endl;
+      print(s.train[testIndex].first);
+      
+      cout << "Normalised Input" << endl;
+      print(train[testIndex].first);
+
+      cout << "Normalised Output" << endl;
+      print(train[testIndex].second);
+
+      
+      write(train[testIndex].first, "train_first.csv");
+      write(train[testIndex].second, "train_second.csv");
+    }
+
     //auto base_train = train;
     if (add_flips) {
       for (auto&[in,out] : s.train) {
-	auto [rin,rout] = sim(in,out);
-	train.push_back({rigid(rin,add_flip_id),rigid(rout,add_flip_id)});
+        auto [rin,rout] = sim(in,out);
+        train.push_back({rigid(rin,add_flip_id),rigid(rout,add_flip_id)});
       }
     }
+
     auto [test_in,test_out] = sim(s.test_in, s.test_out);
 
     {
       int insumsz = 0, outsumsz = 0, macols = 0;
       int maxside = 0, maxarea = 0;
       for (auto&[in,out] : s.train) {
-	maxside = max({maxside, in.w, in.h, out.w, out.h});
-	maxarea = max({maxarea, in.w*in.h, out.w*out.h});
-	insumsz += in.w*in.h;
-	outsumsz += out.w*out.h;
-	macols = max(macols, __builtin_popcount(core::colMask(in)));
+        maxside = max({maxside, in.w, in.h, out.w, out.h});
+        maxarea = max({maxarea, in.w*in.h, out.w*out.h});
+        insumsz += in.w*in.h;
+        outsumsz += out.w*out.h;
+        macols = max(macols, __builtin_popcount(core::colMask(in)));
       }
       int sumsz = max(insumsz, outsumsz);
       cerr << "Features: " << insumsz << ' ' << outsumsz << ' ' << macols << endl;
@@ -187,26 +196,26 @@ void run(int only_sid = -1, int arg = -1) {
     if (print_mem) {
       double size = 0, child = 0, other = 0, inds = 0, maps = 0;
       for (DAG&d : pieces.dag) {
-	/*for (Node&n : d.node) {
-	  for (Image_ img : n.state.vimg) {
-	    size += img.mask.size();
-	  }
-	  child += n.child.size()*8;
-	  other += sizeof(Node);
-	  }*/
-	other += sizeof(TinyNode)*d.tiny_node.size();
-	size += 4*d.tiny_node.bank.mem.size();
-	for (TinyNode&n : d.tiny_node.node) {
-	  if (n.child.sz < TinyChildren::dense_thres)
-	    child += n.child.cap*8;
-	  else
-	    child += n.child.cap*4;
-	}
-	maps += 16*d.hashi.data.size()+4*d.hashi.table.size();
-	//maps += (d.hashi.bucket_count()*32+d.hashi.size()*16);
+        /*for (Node&n : d.node) {
+          for (Image_ img : n.state.vimg) {
+            size += img.mask.size();
+          }
+          child += n.child.size()*8;
+          other += sizeof(Node);
+          }*/
+        other += sizeof(TinyNode)*d.tiny_node.size();
+        size += 4*d.tiny_node.bank.mem.size();
+        for (TinyNode&n : d.tiny_node.node) {
+          if (n.child.sz < TinyChildren::dense_thres)
+            child += n.child.cap*8;
+          else
+            child += n.child.cap*4;
+        }
+        maps += 16*d.hashi.data.size()+4*d.hashi.table.size();
+        //maps += (d.hashi.bucket_count()*32+d.hashi.size()*16);
       }
       for (Piece3&p : pieces.piece) {
-	inds += sizeof(p);
+	      inds += sizeof(p);
       }
       inds += sizeof(pieces.mem[0])*pieces.mem.size();
       printf("Memory: %.1f + %.1f + %.1f + %.1f + %.1f MB\n", size/1e6, child/1e6, other/1e6, maps/1e6, inds/1e6);
@@ -216,7 +225,7 @@ void run(int only_sid = -1, int arg = -1) {
     for (DAG&d : pieces.dag) {
       d.hashi.clear();
       for (TinyNode&n : d.tiny_node.node) {
-	n.child.clear();
+	      n.child.clear();
       }
     }
 
@@ -247,16 +256,16 @@ void run(int only_sid = -1, int arg = -1) {
       set<ull> seen;
       for (const Candidate&cand : cands) {
 
-	//printf("%.20f\n", cand.score);
+        //printf("%.20f\n", cand.score);
 
-	ull h = hashImage(cand.imgs.back());
-	if (seen.insert(h).second) {
-	  filtered.push_back(cand);
-	  if (filtered.size() == 3+skips*3) break;
-	}
+        ull h = hashImage(cand.imgs.back());
+        if (seen.insert(h).second) {
+          filtered.push_back(cand);
+          if (filtered.size() == 3+skips*3) break;
+        }
       }
       for (int i = 0; i < skips*3 && filtered.size(); i++)
-	filtered.erase(filtered.begin());
+	      filtered.erase(filtered.begin());
       answers = move(filtered);
     }
 
@@ -267,7 +276,7 @@ void run(int only_sid = -1, int arg = -1) {
       rec_answers.push_back(sim.rec(s.test_in, cand.imgs.back()));
       double score = cand.score;
       if (add_flips) {
-	score /= 2-1e-5;
+	      score /= 2-1e-5;
       }
       answer_scores.push_back(score);
     }
@@ -277,14 +286,14 @@ void run(int only_sid = -1, int arg = -1) {
 
     if (!eval) {//!eval && s1 && !s2) {
       {
-	visu.next(to_string(si) + " - test");
-	for (auto&[in,out] : train) visu.add(in,out);
-	visu.next(to_string(si) + " - test");
-	visu.add(test_in,test_out);
-	visu.next(to_string(si) + " - cands");
-	for (int i = 0; i < min((int)answers.size(), 5); i++) {
-	  visu.add(test_in, answers[i].imgs.back());
-	}
+        visu.next(to_string(si) + " - test");
+        for (auto&[in,out] : train) visu.add(in,out);
+        visu.next(to_string(si) + " - test");
+        visu.add(test_in,test_out);
+        visu.next(to_string(si) + " - cands");
+        for (int i = 0; i < min((int)answers.size(), 5); i++) {
+          visu.add(test_in, answers[i].imgs.back());
+        }
       }
     }
 
@@ -328,4 +337,32 @@ void run(int only_sid = -1, int arg = -1) {
     printf("Cands: % 4d\n", scores[2]);
     printf("Correct:% 3d\n", scores[3]);
   }
+}
+
+void runSingleFile(const string& aFileName, int arg = -1)
+{
+  vector<Sample> sample = readSingleFile(aFileName);
+  if( sample.size() == 1 )
+  {
+    runFnSearch(sample, -1, arg );
+  }
+}
+
+
+void run(int only_sid = -1, int arg = -1) {
+
+  int eval = 0;
+
+  // string sample_dir = "evaluation";
+  string sample_dir = "training";
+  int samples = -1;
+  if (eval) {
+    sample_dir = "test";
+    samples = -1;
+  }
+
+  vector<Sample> sample = readAll(sample_dir, samples);
+  assert(only_sid < sample.size());
+
+  runFnSearch(sample, only_sid, arg, eval );
 }

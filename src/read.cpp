@@ -141,15 +141,30 @@ Image Sample::readImage() {
   return ret;
 }
 
+vector<Sample> readSingleFile(const string& filename)
+{
+  // make sure we can find the path
+  assert(experimental::filesystem::exists(filename));
+
+  vector<Sample> sample;
+  for (Sample s : Sample(filename).split()) {
+    sample.push_back(s);
+  }  
+
+  return sample;
+}
 
 vector<Sample> readAll(string path, int maxn) { //maxn = -1
-  const string base_path[2] = {"/kaggle/input/abstraction-and-reasoning-challenge/", "./dataset/"};
-
+  const string base_path[2] = {"../../abstraction-and-reasoning-challenge/", "../../dataset/"};
+  
   int base_pathi = 0;
   while (!experimental::filesystem::exists(base_path[base_pathi]+path)) {
+    std::cout << "Couldn't Find Path = " << base_path[base_pathi]+path << endl;
     base_pathi++;
     assert(base_pathi < 2);
   }
+
+  std::cout << "Found Path = " << base_path[base_pathi]+path << endl;
 
   vector<string> files;
   for (auto magic_file_type : experimental::filesystem::directory_iterator(base_path[base_pathi]+path)) {
@@ -157,6 +172,7 @@ vector<Sample> readAll(string path, int maxn) { //maxn = -1
     if (name.size() >= 5 && name.substr(name.size()-5,5) == ".json")
       files.push_back(name);
   }
+
   if (maxn >= 0) files.resize(maxn);
   vector<Sample> sample;
   for (string sid : files) {
@@ -223,9 +239,9 @@ void writeAnswersWithScores(const Sample&s, string fn, vector<Image> imgs, vecto
     fprintf(fp, "|");
     for (int i = 0; i < img.h; i++) {
       for (int j = 0; j < img.w; j++) {
-	int c = img(i,j);
-	assert(c >= 0 && c <= 9);
-	fprintf(fp, "%d", c);
+        int c = img(i,j);
+        assert(c >= 0 && c <= 9);
+        fprintf(fp, "%d", c);
       }
       fprintf(fp, "|");
     }

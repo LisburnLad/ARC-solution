@@ -8,3 +8,4 @@ struct Visu {
 
 void plot(const vector<vector<int>>&inp, const char*filename = "out.ppm");
 void print(Image img);
+void write(Image img, const string& aFilename, const string& aDirectory = "store/tmp/");

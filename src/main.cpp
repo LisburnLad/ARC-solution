@@ -3,6 +3,9 @@
 #include <stdlib.h>
 
 #include <unistd.h>
+#include <string>
+#include <iostream>
+using namespace std;
 
 int main(int argc, char**argv) {
   //rankFeatures();
@@ -11,14 +14,33 @@ int main(int argc, char**argv) {
   //bruteSubmission();
   //bruteSolve();
   int only_sid = -1;
+  string filename = "";
   if (argc >= 2) {
-    only_sid = atoi(argv[1]);
-    printf("Running only task # %d\n", only_sid);
+
+    filename = argv[1];
+    bool has_only_digits = (filename.find_first_not_of( "0123456789" ) == string::npos);
+    if( has_only_digits )
+    {
+      only_sid = atoi(filename.c_str());
+      printf("Running only task # %d\n", only_sid);
+    }
+    else
+    {
+      cout << "Runing for single file: " << filename << endl;
+    }
   }
   int maxdepth = -1;
   if (argc >= 3) {
     maxdepth = atoi(argv[2]);
     printf("Using max depth %d\n", maxdepth);
   }
-  run(only_sid, maxdepth);
+
+  if( only_sid == -1 && filename.length() > 0)
+  {
+    runSingleFile(filename, maxdepth);
+  }
+  else
+  {
+    run(only_sid, maxdepth);
+  }
 }
