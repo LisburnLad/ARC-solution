@@ -361,25 +361,16 @@ int DAG::add(const State &nxt, bool force)
   int nodes = tiny_node.size();
   map_time.start();
   auto [nodei, inserted] = hashi.insert(h, nodes);
-  // auto [it,inserted] = hashi.insert({h,nodes}); int nodei = it->second;
-  // assert(inserted == tiny_inserted);
-  // assert(nodei == tiny_nodei);
+
 
   map_time.stop();
-
   add_time.start();
   if (inserted || force)
   {
     bool ispiece = !nxt.isvec;
     if (!nxt.isvec && target_size != point{-1, -1})
       ispiece &= (nxt.vimg[0].p == point{0, 0} && nxt.vimg[0].sz == target_size);
-    /*{
-      Node n;
-      n.state = nxt;
-      n.ispiece = ispiece;
-      n.freed = false;
-      node.push_back(n);
-      }*/
+
     tiny_node.append(nxt, ispiece);
   }
   add_time.stop();
@@ -611,17 +602,24 @@ vector<DAG> brutePieces2(Image_ test_in, const vector<pair<Image, Image>> &train
   for (int ti = 0; ti < train.size(); ti++)
     and_train_out_mask &= core::colMask(train[ti].second);
 
+  // loop through each training image and add the test image at the end
   for (int ti = 0; ti <= train.size(); ti++)
   {
     vector<point> sizes;
     if (ti < train.size())
+      // add the size of each training input image
       sizes.push_back(train[ti].first.sz);
     else
+      // add the test image size
       sizes.push_back(test_in.sz);
 
+    // add an output size for each training image and the test image
     if (out_sizes.size())
       sizes.push_back(out_sizes[ti]);
 
+    cout << "Train Size = " << train.size() << " Sizes Array = " << sizes.size() << endl;
+
+    // add each of the transform functions
     dag[ti].funcs = initFuncs3(sizes);
 
     dag[ti].initial(test_in, train, sizes, ti);
@@ -643,40 +641,17 @@ vector<DAG> brutePieces2(Image_ test_in, const vector<pair<Image, Image>> &train
       vector<pair<string, int>> toapply;
       toapply.emplace_back("toOrigin", 0);
       for (int c = 1; c <= 5; c++)
+      {
         if (and_train_out_mask >> c & 1)
+        {
           toapply.emplace_back("colShape " + to_string(c), 1);
+        }
+      }
       toapply.emplace_back("embed 1", 2);
       dag[ti].applyFuncs(toapply, 0);
-      /*
-      dag[ti].applyFunc("toOrigin", 0);
-      if (print) cout << now()-start_time << endl;
 
-      int mask;
-      if (ti < train.size()) {
-  mask = core::colMask(train[ti].second);
-  all_train_out_mask |= mask;
-      } else {
-  mask = all_train_out_mask;
-      }
-
-      for (int c = 1; c <= 5; c++)
-  if (and_train_out_mask>>c&1)
-  dag[ti].applyFunc("colShape "+to_string(c), 0);
-      if (print) cout << now()-start_time << endl;
-
-      if (ti < train.size())
-  deducePositions(dag[ti], train[ti].second);
-      if (print) cout << now()-start_time << endl;
-
-      dag[ti].applyFunc("embed 1", 0);
-      */
       if (print)
         cout << now() - start_time << endl;
-
-      /*if (ti < train.size())
-  deducePositions(dag[ti], train[ti].second);
-
-  if (print) cout << now()-start_time << endl;*/
 
       total_time.stop();
       total_time.print("Total time");
@@ -692,6 +667,7 @@ vector<DAG> brutePieces2(Image_ test_in, const vector<pair<Image, Image>> &train
 
       state_time.print("getState");
       // exit(0);
+
       // FILE*fp = fopen("images.txt", "w");
       // for (Node &n : dag[ti].node)
       // {
@@ -703,6 +679,7 @@ vector<DAG> brutePieces2(Image_ test_in, const vector<pair<Image, Image>> &train
       //     fprintf(fp, "\n");
       //   }
       // }
+
       // exit(0);
       // dag[ti].freeAll();
     }

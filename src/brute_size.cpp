@@ -139,6 +139,9 @@ point solveSize(vector<vector<point>>&seeds, const vector<point>& target) {
   return ans;
 }
 
+// supply:
+// - the test input image
+// - the array of training input-output pairs
 vector<point> bruteSize(Image_ test_in, vector<pair<Image,Image>> train) {
   vector<point> out_sizes;
   for (auto [in,out] : train) {

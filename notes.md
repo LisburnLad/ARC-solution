@@ -12,7 +12,7 @@ This will generate a "output/answer_-1_3.csv" file
 
 <code>
 cd notebooks/absres-c-files<br>
-python safe_run.py ../../dataset/training/0a938d79.json 1<br>
+python safe_run.py dataset/training/0a938d79.json 1<br>
 </code>
 
 This generates sample output in: notebooks/absres-c-files/store/tmp/0a938d79.out (and .err)<br>

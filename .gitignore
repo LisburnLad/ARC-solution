@@ -6,3 +6,5 @@ store
 submission_part.csv
 output
 count_tasks
+notebooks/*.csv
+notebooks/*.json

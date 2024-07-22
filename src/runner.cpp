@@ -115,19 +115,21 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
     {
       write(s.train[testIndex].first, "s_train_first.csv");
       write(s.train[testIndex].second, "s_train_second.csv");
-      
+
       cout << "Original Input" << endl;
       print(s.train[testIndex].first);
-      
+
       cout << "Normalised Input" << endl;
       print(train[testIndex].first);
 
       cout << "Normalised Output" << endl;
       print(train[testIndex].second);
 
-      
+
       write(train[testIndex].first, "train_first.csv");
       write(train[testIndex].second, "train_second.csv");
+
+      write(s.test_in, "test_in.csv");
     }
 
     //auto base_train = train;
