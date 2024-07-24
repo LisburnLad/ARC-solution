@@ -311,46 +311,12 @@ Functions3 initFuncs3(const vector<point> &sizes)
     said = 1;
   }
 
-  // funcs.add("smear",    [](Image_ a, Image_ b) {return smear(a,b,6);});
-
-  // funcs.add(insideMarked); //only do once at depth 0
-
-  // Smear diagonals?
-
-  // outerProducts
-
-  // for (int id = 0; id < 4; id++)
-  //   funcs.add([id](Image_ img) {return gravity(img, id);});
-
-  // Image makeBorder(Image_ img, int bcol = 1);
-  // Image makeBorder2(Image_ img, Image_ bord);
-  // Image greedyFillBlack(Image_ img, int N = 3);
-  // Image extend2(Image_ img, Image_ room);
-  // Image replaceTemplate(Image_ in, Image_ need_, Image_ marked_, int overlapping = 0, int rigids = 0);
-  // Image swapTemplate(Image_ in, Image_ a, Image_ b, int rigids = 0);
-
-  // funcs.add("heuristicCut", heuristicCut);
-
   return funcs;
 }
 
 Image DAG::getImg(int ni)
 {
   return tiny_node.getImg(ni);
-  // assert(tiny_node.getImg(ni) == node[ni].vimg[0]);
-  // return node[ni].state.vimg[0];
-  /*
-  //cout << nodei << endl;
-  assert(nodei >= 0 && nodei < (int)node.size());
-  assert(!node[nodei].isvec);
-  if (node[nodei].pfi == embed1fi) {
-    assert(funcs.f_list[embed1fi](node[nodei], tmp_node));
-    //assert(tmp_node.vimg == node[nodei].vimg);
-    return tmp_node.vimg[0];
-  } else {
-    assert(node[nodei].vimg.size());
-    return node[nodei].vimg[0];
-    }*/
 }
 
 int DAG::add(const State &nxt, bool force)

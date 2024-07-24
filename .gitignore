@@ -8,3 +8,4 @@ output
 count_tasks
 notebooks/*.csv
 notebooks/*.json
+.vscode/settings.json

@@ -1,8 +1,3 @@
-/*#include <vector>
-#include <cassert>
-#include <iostream>
-#include <tuple>
-#include <functional>*/
 #include "precompiled_stl.hpp"
 using namespace std;
 
@@ -20,7 +15,7 @@ namespace core
     return mask;
   }
   int countCols(Image_ img, int include0)
-  { // include0 = 0
+  { 
     int mask = colMask(img);
     if (!include0)
       mask = mask & ~1;
@@ -36,7 +31,7 @@ namespace core
   }
 
   Image full(point p, point sz, int filling)
-  { // filling = 1
+  { 
     Image ret;
     ret.p = p;
     ret.sz = sz;
@@ -50,7 +45,7 @@ namespace core
   }
 
   Image full(point sz, int filling)
-  { // filling = 1
+  { 
     Image ret;
     ret.p = {0, 0};
     ret.sz = sz;
@@ -87,14 +82,6 @@ namespace core
         if (img(i, j))
         {
           countComponents_dfs(img, i, j);
-          /*function<void(int,int)> dfs = [&](int r, int c) {
-            if (r < 0 || r >= img.h || c < 0 || c >= img.w || !img(r,c)) return;
-            img(r,c) = 0;
-            for (int nr : {r-1,r,r+1})
-              for (int nc : {c-1,c,c+1})
-          dfs(nr,nc);
-          };
-          dfs(i,j);*/
           ans++;
         }
       }
@@ -103,7 +90,7 @@ namespace core
   }
 
   char majorityCol(Image_ img, int include0)
-  { // include0 = 0
+  { 
     int cnt[10] = {};
     for (int i = 0; i < img.h; i++)
       for (int j = 0; j < img.w; j++)
@@ -126,6 +113,7 @@ namespace core
     }
     return ret;
   }
+
   Image subImage(Image_ img, point p, point sz)
   {
     assert(p.x >= 0 && p.y >= 0 && p.x + sz.x <= img.w && p.y + sz.y <= img.h && sz.x >= 0 && sz.y >= 0);
@@ -140,7 +128,7 @@ namespace core
   }
 
   vector<pair<Image, int>> splitCols(Image_ img, int include0)
-  { // include0 = 0
+  { 
     vector<pair<Image, int>> ret;
     int mask = colMask(img);
     for (char c = !include0; c < 10; c++)
