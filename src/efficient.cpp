@@ -34,20 +34,24 @@ pair<int,bool> TinyHashMap::insert(ull key, int value) {
 
 
 
-void TinyChildren::add(int fi, int to) {
-  assert(fi >= 0);
+void TinyChildren::add(int aFI, int to) {
+
+  assert(aFI >= 0);
+
+  itsFI = aFI;
+
   if (sz+1 == dense_thres) {
     //Convert to dense
-    cap = max(sparse[sz-1].first,fi)+1; //Max fi
+    cap = max(sparse[sz-1].first,aFI)+1; //Max aFI
     pair<int,int>*old = sparse;
     dense = new int[cap];
     fill_n(dense, cap, None);
-    dense[fi] = to;
+    dense[aFI] = to;
     for (int i = 0; i < sz; i++) {
-      auto [fi, to] = old[i];
-      assert(fi >= 0);
-      assert(fi < cap);
-      dense[fi] = to;
+      auto [aFI, to] = old[i];
+      assert(aFI >= 0);
+      assert(aFI < cap);
+      dense[aFI] = to;
     }
     assert(old);
     delete[]old;
@@ -65,42 +69,43 @@ void TinyChildren::add(int fi, int to) {
     }
     {
       int p = sz++;
-      while (p && sparse[p-1].first > fi) {
-	sparse[p] = sparse[p-1];
-	p--;
+      while (p && sparse[p-1].first > aFI) {
+        sparse[p] = sparse[p-1];
+        p--;
       }
-      sparse[p] = {fi, to};
+      sparse[p] = {aFI, to};
     }
   } else {
     //Dense
-    if (cap <= fi) {
+    if (cap <= aFI) {
       int oldcap = cap;
       int*old = dense;
-      cap = (fi+1)*3/2;
+      cap = (aFI+1)*3/2;
       dense = new int[cap];
       fill_n(dense+oldcap, cap-oldcap, None);
       copy_n(old, oldcap, dense);
       assert(old);
       delete[]old;
     }
-    dense[fi] = to;
+    dense[aFI] = to;
   }
 }
-int TinyChildren::get(int fi) {
-  assert(fi >= 0);
+
+int TinyChildren::get(int aFI) {
+  assert(aFI >= 0);
   if (sz < dense_thres) {
     int low = 0, high = sz-1;
     while (low <= high) {
       int mid = (low+high)>>1;
       int cfi = sparse[mid].first;
-      if (cfi == fi) return sparse[mid].second;
-      else if (cfi > fi) high = mid-1;
+      if (cfi == aFI) return sparse[mid].second;
+      else if (cfi > aFI) high = mid-1;
       else low = mid+1;
     }
     return None;
   } else {
-    if (fi >= cap) return None;
-    return dense[fi];
+    if (aFI >= cap) return None;
+    return dense[aFI];
   }
 }
 void TinyChildren::legacy(vector<pair<int,int>>&ret) {
@@ -114,7 +119,7 @@ void TinyChildren::legacy(vector<pair<int,int>>&ret) {
     ret.resize(0);
     for (int i = 0; i < cap; i++) {
       if (dense[i] != None)
-	ret.emplace_back(i, dense[i]);
+	      ret.emplace_back(i, dense[i]);
     }
   }
 }

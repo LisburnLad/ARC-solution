@@ -4,11 +4,14 @@
 double now();
 
 struct State {
+
+  int fi;
+
   vImage vimg;
   int depth;
   bool isvec;
   State() {}
-  State(vImage_ vimg_, bool isvec_, int depth_) : vimg(vimg_), isvec(isvec_), depth(depth_) {}
+  State(vImage_ vimg_, bool isvec_, int depth_) : fi(-1), vimg(vimg_), isvec(isvec_), depth(depth_) {}
   ull hash() const {
     ull r = isvec;
     for (Image_ img : vimg) {

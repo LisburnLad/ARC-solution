@@ -238,32 +238,39 @@ extern int MAXDEPTH;
 
 void addDeduceOuterProduct(Pieces &pieces, vector<pair<Image, Image>> train, vector<Candidate> &cands)
 {
+  // Initialize the deduceOuterProduct object with the training data
   deduceOuterProduct deduce_op(train);
 
   int interestings = 0;
+  // Count the number of interesting training examples
   for (auto [in, out] : deduce_op.train_targets)
   {
     if (core::count(in) > 1 && core::count(out) > 1)
       interestings++;
   }
 
+  // If the number of interesting examples is less than half the training size, return early
   if (interestings * 2 < train.size())
     return;
 
   vImage a, b;
+  // Iterate over two possible candidates (a and b)
   for (int k : {0, 1})
   {
     vImage &cand = k ? b : a;
     int best_match = -1;
 
+    // Lambda function to add a candidate image vector
     auto add = [&](vImage_ vi)
     {
       int matches = 0;
+      // Count the number of matches between the candidate and the training targets
       for (int i = 0; i < train.size(); i++)
       {
         Image_ target = k ? deduce_op.train_targets[i].second : deduce_op.train_targets[i].first;
         matches += (vi[i] == target);
       }
+      // Update the best match if the current candidate has more matches
       if (matches > best_match)
       {
         best_match = matches;
@@ -271,11 +278,13 @@ void addDeduceOuterProduct(Pieces &pieces, vector<pair<Image, Image>> train, vec
       }
     };
 
+    // Iterate over the pieces memory to find the best matching candidate
     for (int pi = 0; pi < pieces.mem.size(); pi += pieces.dag.size())
     {
       int *ind = &pieces.mem[pi];
       // TODO: Use hashes to compare instead of full images
       vImage imgs;
+      // Collect images from the pieces DAG
       for (int i = 0; i <= train.size(); i++)
       {
         if (pieces.dag[i].tiny_node[ind[i]].isvec)
@@ -284,9 +293,11 @@ void addDeduceOuterProduct(Pieces &pieces, vector<pair<Image, Image>> train, vec
         imgs.push_back(img);
         imgs.back().p = point{0, 0};
       }
+      // Add the collected images if they match the training size
       if (imgs.size() == train.size() + 1)
         add(imgs);
     }
+    // Add the training targets as candidates
     for (auto [x, y] : deduce_op.train_targets)
     {
       add(vImage(train.size() + 1, (k ? y : x)));
@@ -294,23 +305,16 @@ void addDeduceOuterProduct(Pieces &pieces, vector<pair<Image, Image>> train, vec
   }
 
   {
+    // Ensure the candidate vectors have the correct size
     assert(a.size() == train.size() + 1);
     assert(b.size() == train.size() + 1);
 
     // TODO: Use correct depths
     vImage imgs;
+    // Reconstruct the images from the candidates a and b
     for (int i = 0; i <= train.size(); i++)
       imgs.push_back(deduce_op.reconstruct(a[i], b[i]));
+    // Add the reconstructed images to the candidates list
     cands.emplace_back(imgs, 2, MAXDEPTH, MAXDEPTH * 2);
   }
-
-  /*
-  visu.next(to_string(si));
-  for (auto [in,out] : train)
-    visu.add(in,out);
-
-  visu.next(to_string(si)+"!");
-  for (auto [in,out] : deduce_op.train_targets) {
-    visu.add(in,out);
-    }*/
 }

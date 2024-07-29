@@ -254,37 +254,48 @@ vector<Candidate> greedyCompose2(Pieces &pieces, vector<Image> &target, vector<p
         if (!ok)
           continue;
   
+        // Iterate over each index in the sparsej vector
         for (int j : sparsej)
         {
+          // Calculate the active bits by XORing with flip and ORing with full
           ull active = ((active_data[j] ^ flip) | full);
-          cnt += popcount64d(active & ~cur.data[j] & careMask.data[j]);          
+          // Count the number of bits that are active and not in the current data but are in the care mask
+          cnt += popcount64d(active & ~cur.data[j] & careMask.data[j]);
         }
-  
+
+        // Check if the current configuration is valid and better than the best found so far
         if (ok && make_pair(cnt, -covered) > bestcnt)
         {
+          // Update the best count and index
           bestcnt = make_pair(cnt, -covered);
           besti = i;
-  
+
+          // Update the temporary active data based on the value of k
           if (k == 0)
           {
+            // Invert all bits in active_data
             for (int j = 0; j < M64; j++)
               tmp_active[j] = ~active_data[j];
           }
           else if (k == 1)
           {
+            // Copy active_data as is
             for (int j = 0; j < M64; j++)
               tmp_active[j] = active_data[j];
           }
           else
           {
+            // Set all bits to 1
             for (int j = 0; j < M64; j++)
               tmp_active[j] = ~0;
           }
+          // Store the best active configuration
           best_active = tmp_active;
         }
       }
     }
   
+    // If no valid index was found, return -1
     if (besti == -1)
       return -1;
   
@@ -330,36 +341,43 @@ vector<Candidate> greedyCompose2(Pieces &pieces, vector<Image> &target, vector<p
     }
   };
 
+  // Map to store images filled with black pixels based on their hash
   map<ull, Image> greedy_fill_mem;
 
-  int maxiters = 10;
+  int maxiters = 10; // Maximum number of iterations for the greedy algorithm
 
+  // Iterate over piece depths in steps of 10
   for (int pdt = max_piece_depth % 10; pdt <= max_piece_depth; pdt += 10)
   {
-    int piece_depth_thres = pdt;
+    int piece_depth_thres = pdt; // Set the current piece depth threshold
 
+    // Perform 10 iterations for each piece depth
     for (int it0 = 0; it0 < 10; it0++)
     {
+      // Iterate over all possible masks (up to 5 bits or the size of the target)
       for (int mask = 1; mask < min(1 << target.size(), 1 << 5); mask++)
       {
         vector<int> maskv;
+        // Create a vector of indices where the mask has bits set
         for (int j = 0; j < target.size(); j++)
           if (mask >> j & 1)
             maskv.push_back(j);
 
         int caremask;
+        // Determine the caremask based on the current iteration
         if (it0 < maskv.size())
         {
           caremask = 1 << maskv[it0];
         }
         else
         {
-          continue;
+          continue; // Skip if the iteration exceeds the mask vector size
         }
 
         mybitset cur(M), careMask(M);
         {
           int base = 0;
+          // Set bits in cur and careMask based on the mask and caremask
           for (int j = 0; j < sz.size(); j++)
           {
             if (!(mask >> j & 1))
@@ -372,63 +390,74 @@ vector<Candidate> greedyCompose2(Pieces &pieces, vector<Image> &target, vector<p
           }
         }
 
-        int cnt_pieces = 0;
-        vector<int> piece_depths;
-        int sum_depth = 0, max_depth = 0;
+        int cnt_pieces = 0; // Counter for the number of pieces used
+        vector<int> piece_depths; // Vector to store the depths of pieces used
+        int sum_depth = 0, max_depth = 0; // Sum and maximum depth of pieces
 
-        vector<Image> ret = init;
+        vector<Image> ret = init; // Initialize the result with the initial images
         for (int it = 0; it < maxiters; it++)
         {
-
+          // Perform the core greedy composition algorithm
           int depth = greedyComposeCore(cur, careMask, piece_depth_thres, ret);
           if (depth == -1)
-            break;
+            break; // Exit if no valid depth is found
+
           piece_depths.push_back(depth);
           cnt_pieces++;
           sum_depth += depth;
           max_depth = max(max_depth, depth);
 
           {
-            greedy_fill_time.start();
+            greedy_fill_time.start(); // Start timing the greedy fill process
             vImage cp = ret;
-            int carei = 31 - __builtin_clz(caremask);
+            int carei = 31 - __builtin_clz(caremask); // Find the index of the care bit
             assert(caremask == 1 << carei);
             int ok = 1;
             {
               Image &img = cp[carei];
+
+              // Replace null characters in the mask with black
               for (char &c : img.mask)
                 if (c == 10)
                   c = 0;
-              img = greedyFillBlack(img);
+
+              img = greedyFillBlack(img); // Fill the image with black pixels
               if (img != target[carei])
-                ok = 0;
+                ok = 0; // Mark as not okay if the filled image does not match the target
             }
+
             if (ok)
             {
+              // Process the remaining images
               for (int i = 0; i < cp.size(); i++)
               {
                 if (i == carei)
                   continue;
                 Image &img = cp[i];
+
+                // Replace null characters in the mask with black
                 for (char &c : img.mask)
                   if (c == 10)
                     c = 0;
-                ull h = hashImage(img);
+
+                ull h = hashImage(img); // Compute the hash of the image
                 if (!greedy_fill_mem.count(h))
                 {
-                  greedy_fill_mem[h] = greedyFillBlack(img);
+                  greedy_fill_mem[h] = greedyFillBlack(img); // Fill the image with black pixels if not already done
                 }
+                
                 img = greedy_fill_mem[h];
                 if (img.w * img.h <= 0)
-                  ok = 0;
+                  ok = 0; // Mark as not okay if the image dimensions are invalid
               }
               if (ok)
-                rets.emplace_back(cp, cnt_pieces + 1, sum_depth, max_depth);
+                rets.emplace_back(cp, cnt_pieces + 1, sum_depth, max_depth); // Add the result to the list of results
             }
-            greedy_fill_time.stop();
+            greedy_fill_time.stop(); // Stop timing the greedy fill process
           }
         }
 
+        // Add the final result to the list of results
         rets.emplace_back(ret, cnt_pieces, sum_depth, max_depth);
       }
     }

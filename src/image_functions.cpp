@@ -164,8 +164,6 @@ Image broadcast(Image_ col, Image_ shape, int include0)
           maj = c, w = weight[c];
       }
       ret(i, j) = maj;
-      // point sz = {max(c1-c0, 1), max(r1-r0, 1)};
-      // ret(i,j) = core::majorityCol(core::subImage(col, {c0,r0}, sz), include0);
     }
   }
   return ret;
@@ -183,6 +181,8 @@ Image colShape(Image_ col, Image_ shape)
         ret(i, j) = 0;
   return ret;
 }
+
+// convert all coloured pixels in the supplied image to have a value of 'id'
 Image colShape(Image_ shape, int id)
 {
   assert(id >= 0 && id < 10);

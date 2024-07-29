@@ -23,5 +23,6 @@ vImage gravity(Image_ in, int d);
 Image myStack(vImage_ lens, int id);
 Image stackLine(vImage_ shapes);
 Image composeGrowing(vImage_ imgs);
+Image moveToCorner(vImage_ imgs);
 
 Image pickUnique(vImage_ imgs, int id);

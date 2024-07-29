@@ -24,24 +24,32 @@ struct TinyHashMap {
 
 
 struct TinyChildren {
+
+  int itsFI = -1;
+
   static constexpr int dense_thres = 10;
   static constexpr int None = -2;
   union {
     int*dense;
     pair<int,int>*sparse;
   };
+
   short sz = 0, cap = 0;
   TinyChildren() {
     dense = NULL;
   }
+
   void add(int fi, int to);
   int get(int fi);
+
   ~TinyChildren() {
     delete[]dense;
     dense = NULL;
   }
+
   TinyChildren(const TinyChildren&) = delete;
   TinyChildren(TinyChildren&&o) {
+    itsFI = o.itsFI;
     dense = o.dense;
     sz = o.sz, cap = o.cap;
     o.dense = NULL;
@@ -52,6 +60,7 @@ struct TinyChildren {
     delete[]dense;
     dense = NULL;
     sz = cap = 0;
+    itsFI = -1;
   }
 };
 

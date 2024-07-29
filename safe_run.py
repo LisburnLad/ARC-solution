@@ -147,7 +147,7 @@ system("rm -f output/answer*.csv")
 filename = ""
 print(f"Number of args = {len(sys.argv)}")
 if len(sys.argv) == 3:
-    
+
     # test if the supplied argument is a file index or a file path
     file_index = all_digits(sys.argv[1])
     print(f"Argument 1 = {sys.argv[1]} - integer = {file_index}")
@@ -162,23 +162,24 @@ if len(sys.argv) == 3:
       filename = sys.argv[1]
       n = int(sys.argv[2])
       ntasks = n
-      print(f"File path = {filename}" )      
+      print(f"File path = {filename}" )
 
-      basename = os.path.basename(filename)            
+      basename = os.path.basename(filename)
       # task_list = os.path.splitext(basename)[0]
       task_list = [-1]
 else:
-    ntasks = int(check_output('./count_tasks'))
+    count_output = check_output('./count_tasks')
+    ntasks = int(count_output)
     task_list = range(0, ntasks)
     #print("Usage: python %s <start_task> <#tasks>"%sys.argv[0])
 
 #TODO: change back to depth 3/4
 depth3 = []
 if filename == "":
-  for i in range(ntasks):   
+  for i in range(ntasks):
     depth3.append(Command("./run %d 3"%i))
 else:
-  depth3.append(Command(f"./run {filename} 3"))  
+  depth3.append(Command(f"./run {filename} 3"))
 stats3 = runAll(depth3, 4)
 
 flip3 = []
@@ -187,7 +188,7 @@ if filename == "":
       status, t, m = stats3[depth3[i].cmd]
       flip3.append(Command("./run %d 23"%i, t*2, m*2, 100))
 else:
-  flip3.append(Command(f"./run {filename} 23"))        
+  flip3.append(Command(f"./run {filename} 23"))
 stats3_flip = runAll(flip3, 4)
 
 flip3 = []
@@ -196,7 +197,7 @@ if filename == "":
       status, t, m = stats3[depth3[i].cmd]
       flip3.append(Command("./run %d 33"%i, t*2, m*2, 100))
 else:
-  flip3.append(Command(f"./run {filename} 33"))          
+  flip3.append(Command(f"./run {filename} 33"))
 runAll(flip3, 4)
 
 depth4 = []
@@ -205,7 +206,7 @@ if filename == "":
       status, t, m = stats3[depth3[i].cmd]
       depth4.append(Command("./run %d 4"%i, t*20, m*20, 2))
 else:
-  flip3.append(Command(f"./run {filename} 4"))          
+  flip3.append(Command(f"./run {filename} 4"))
 stats4 = runAll(depth4, 2)
 
 def read(fn):

@@ -14,13 +14,15 @@ namespace core
         mask |= 1 << img(i, j);
     return mask;
   }
+
   int countCols(Image_ img, int include0)
-  { 
+  {
     int mask = colMask(img);
     if (!include0)
       mask = mask & ~1;
     return __builtin_popcount(mask);
   }
+
   int count(Image_ img)
   {
     int ans = 0;
@@ -31,7 +33,7 @@ namespace core
   }
 
   Image full(point p, point sz, int filling)
-  { 
+  {
     Image ret;
     ret.p = p;
     ret.sz = sz;
@@ -45,7 +47,7 @@ namespace core
   }
 
   Image full(point sz, int filling)
-  { 
+  {
     Image ret;
     ret.p = {0, 0};
     ret.sz = sz;
@@ -90,7 +92,7 @@ namespace core
   }
 
   char majorityCol(Image_ img, int include0)
-  { 
+  {
     int cnt[10] = {};
     for (int i = 0; i < img.h; i++)
       for (int j = 0; j < img.w; j++)
@@ -128,7 +130,7 @@ namespace core
   }
 
   vector<pair<Image, int>> splitCols(Image_ img, int include0)
-  { 
+  {
     vector<pair<Image, int>> ret;
     int mask = colMask(img);
     for (char c = !include0; c < 10; c++)
@@ -143,5 +145,21 @@ namespace core
       }
     }
     return ret;
+  }
+
+  // test if the 2 images are the same in terms of pixels set (i.e. don't compare colour)
+  bool binaryCompare(Image img, Image img2 )
+  {
+    if( img.sz == img2.sz )
+    {
+      for(int x = 0; x < img.sz.x; x++)
+        for(int y = 0; y < img.sz.y; y++)
+          if((img(x,y) > 0) != (img2(x,y) > 0))
+          {
+            return false;
+          }
+      return true;
+    }
+    return false;
   }
 };

@@ -4,13 +4,23 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-    
     {
-      "name": "(gdb) Run Corners = a61ba2ce",
+      "name": "Python Debugger: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal"
+      // "args": ["arg1", "arg2", "--option", "value"]
+    },
+    {
+      "name": "(gdb) Run Index = 0 (a61ba2ce)",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/run",
-      "args": ["dataset/training/a61ba2ce.json","3"],
+      "args": [
+        "0",
+        "3"
+      ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
@@ -28,6 +38,60 @@
           "ignoreFailures": true
         }
       ]
-    }    
+    },
+    {
+      "name": "(gdb) Run Corners = a61ba2ce",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/run",
+      "args": [
+        "dataset/training/a61ba2ce.json",
+        "3"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set Disassembly Flavor to Intel",
+          "text": "-gdb-set disassembly-flavor intel",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "(gdb) Run Cut Piece = 0b148d64",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/run",
+      "args": [
+        "dataset/training/0b148d64.json",
+        "3"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set Disassembly Flavor to Intel",
+          "text": "-gdb-set disassembly-flavor intel",
+          "ignoreFailures": true
+        }
+      ]
+    }
   ]
 }

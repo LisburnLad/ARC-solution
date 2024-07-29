@@ -149,14 +149,16 @@ vector<Sample> readSingleFile(const string& filename)
   vector<Sample> sample;
   for (Sample s : Sample(filename).split()) {
     sample.push_back(s);
-  }  
+  }
 
   return sample;
 }
 
 vector<Sample> readAll(string path, int maxn) { //maxn = -1
-  const string base_path[2] = {"../../abstraction-and-reasoning-challenge/", "../../dataset/"};
-  
+  // const string base_path[2] = {"./abstraction-and-reasoning-challenge/", "./dataset/"};
+  const string base_path[2] = {"./dataset/", "../../dataset/"};
+
+
   int base_pathi = 0;
   while (!experimental::filesystem::exists(base_path[base_pathi]+path)) {
     std::cout << "Couldn't Find Path = " << base_path[base_pathi]+path << endl;
@@ -164,7 +166,7 @@ vector<Sample> readAll(string path, int maxn) { //maxn = -1
     assert(base_pathi < 2);
   }
 
-  std::cout << "Found Path = " << base_path[base_pathi]+path << endl;
+  // std::cout << "Found Path = " << base_path[base_pathi]+path << endl;
 
   vector<string> files;
   for (auto magic_file_type : experimental::filesystem::directory_iterator(base_path[base_pathi]+path)) {

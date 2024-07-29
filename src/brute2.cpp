@@ -17,8 +17,9 @@ using namespace std;
 
 extern int MAXDEPTH, print_nodes;
 
-// double build_f_time = 0, apply_f_time = 0;
-// double real_f_time = 0;
+vImage global_img_v;
+
+
 
 double now()
 {
@@ -45,27 +46,32 @@ void Functions3::add(const string &name, int cost_, const function<bool(const St
 }
 
 void Functions3::add(string name, int cost, const function<Image(Image_)> &f, int list)
-{ // list = 1
+{
+  // Create a lambda function that applies the given function 'f' to each image in the state
   auto func = [f](const State &cur, State &nxt)
   {
-    // if (cur.isvec) return false;
-
+    // Resize the next state's image vector to match the current state's image vector
     nxt.vimg.resize(cur.vimg.size());
-    nxt.isvec = cur.isvec;
+    nxt.isvec = cur.isvec; // Copy the isvec flag from the current state to the next state
 
-    int area = 0;
+    int area = 0; // Initialize the area counter
+
+    // Iterate over each image in the current state's image vector
     for (int i = 0; i < cur.vimg.size(); i++)
     {
-      real_f_time.start();
-      nxt.vimg[i] = f(cur.vimg[i]);
-      real_f_time.stop();
+      real_f_time.start(); // Start timing the function application
+      nxt.vimg[i] = f(cur.vimg[i]); // Apply the function 'f' to the current image and store the result in the next state
+      real_f_time.stop(); // Stop timing the function application
 
+      // Calculate the area of the resulting image and add it to the area counter
       area += nxt.vimg[i].w * nxt.vimg[i].h;
       if (area > MAXPIXELS)
-        return false;
+        return false; // Return false if the total area exceeds the maximum allowed pixels
     }
-    return true;
+    return true; // Return true if all images were processed successfully
   };
+
+  // Add the function to the list of functions with the given name, cost, and list index
   add(name, cost, func, list);
 }
 
@@ -152,6 +158,7 @@ string Functions3::getName(int fi)
   assert(fi >= 0 && fi < names.size());
   return names[fi];
 }
+
 int Functions3::findfi(string name)
 {
   int fi = find(names.begin(), names.end(), name) - names.begin();
@@ -244,7 +251,8 @@ Functions3 initFuncs3(const vector<point> &sizes)
   {
     for (int dx = -2; dx <= 2; dx++)
     {
-      funcs.add("Move " + to_string(dx) + " " + to_string(dy), 10, [dx, dy](Image_ img)
+      funcs.add("Move " + to_string(dx) + " " + to_string(dy), 10,
+                [dx, dy](Image_ img)
                 { return Move(img, Pos(dx, dy)); }, 0);
     }
   }
@@ -254,6 +262,8 @@ Functions3 initFuncs3(const vector<point> &sizes)
   funcs.add(sizes, "wrap", 10, wrap);
   funcs.add(sizes, "broadcast", 10, [](Image_ a, Image_ b)
             { return broadcast(a, b); });
+  // funcs.add(sizes, "moveToCorner", 10, [](Image_ a, Image_ b)
+  //           { return moveToCorner(a, b); });
   funcs.add(sizes, "repeat 0", 10, [](Image_ a, Image_ b)
             { return repeat(a, b); });
   funcs.add(sizes, "repeat 1", 10, [](Image_ a, Image_ b)
@@ -287,6 +297,7 @@ Functions3 initFuncs3(const vector<point> &sizes)
               [id](vImage_ v)
               { return pickUnique(v, id); });
 
+  funcs.add("moveToCorner", 10, moveToCorner);
   funcs.add("composeGrowing", 10, composeGrowing);
   funcs.add("stackLine", 10, stackLine);
   for (int id = 0; id < 2; id++) // consider going to 4
@@ -343,42 +354,45 @@ int DAG::add(const State &nxt, bool force)
   return nodei;
 }
 
+
 void DAG::build()
 {
-  build_f_time.start();
+  build_f_time.start(); // Start timing the build function
 
+  // Iterate over each node in the tiny_node vector
   for (int curi = 0; curi < tiny_node.size(); curi++)
   {
-    int depth = tiny_node[curi].depth;
+    int depth = tiny_node[curi].depth; // Get the depth of the current node
     if (depth + 1 > MAXDEPTH)
-      continue;
+      continue; // Skip if the depth exceeds the maximum allowed depth
 
-    // vector<pair<int,int>> child;
-    State nxt;
-    state_time.start();
-    State cur_state = tiny_node.getState(curi);
-    state_time.stop();
+    State nxt; // Initialize the next state
+    state_time.start(); // Start timing the state retrieval
+    State cur_state = tiny_node.getState(curi); // Get the current state of the node
+    state_time.stop(); // Stop timing the state retrieval
+
+    // Iterate over each function index in the listed functions
     for (int fi : funcs.listed)
     {
-      nxt.depth = depth + funcs.cost[fi];
+      nxt.depth = depth + funcs.cost[fi]; // Update the depth of the next state
       if (nxt.depth > MAXDEPTH)
-        continue;
+        continue; // Skip if the depth exceeds the maximum allowed depth
+
+      // Apply the function to the current state to get the next state
       if (funcs.f_list[fi](cur_state, nxt))
       {
-        int newi = add(nxt);
-        // child.emplace_back(fi, newi);
-        tiny_node.addChild(curi, fi, newi);
+        nxt.fi = fi;
+        int newi = add(nxt); // Add the next state to the DAG and get its index
+        tiny_node.addChild(curi, fi, newi); // Add the new state as a child of the current node
       }
       else
       {
-        tiny_node.addChild(curi, fi, -1);
-        // child.emplace_back(fi, -1);
+        tiny_node.addChild(curi, fi, -1); // Add a placeholder child if the function application fails
       }
     }
-    // node[curi].child = child;
   }
 
-  build_f_time.stop();
+  build_f_time.stop(); // Stop timing the build function
 }
 
 void DAG::initial(Image_ test_in, const vector<pair<Image, Image>> &train, vector<point> sizes, int ti)
@@ -387,6 +401,41 @@ void DAG::initial(Image_ test_in, const vector<pair<Image, Image>> &train, vecto
     target_size = sizes[1];
   else
     target_size = point{-1, -1};
+
+  // split the training outputs into shapes and see if these shapes are common across all training outputs
+  bool matchingImageParts = (train.size()>0);
+  vImage last_img_v;
+  for (int index = 0; index < train.size(); index++)
+  {
+    vImage img_v = splitAll(train[index].second);
+    if( img_v.size() < 1 ) matchingImageParts = false;
+    else
+    {
+      if( index > 0 )
+      {
+        if( img_v.size()==last_img_v.size() )
+        {
+          for( int n = 0; n < img_v.size(); n++ )
+          {
+            // compare shapes, not colours
+            if( core::binaryCompare(img_v[n], last_img_v[n]) == false )
+            {
+              matchingImageParts = false;
+            }
+          }
+        }
+      }
+
+      last_img_v = img_v;
+    }
+  }
+
+  // test if all training outputs had the same image shapes
+  if( matchingImageParts )
+  {
+    // set the global image shapes
+    global_img_v = last_img_v;
+  }
 
   Image in = ti < train.size() ? train[ti].first : test_in;
 
@@ -399,10 +448,6 @@ void DAG::initial(Image_ test_in, const vector<pair<Image, Image>> &train, vecto
   // Outputs of other trains
   for (int tj = 0; tj < train.size(); tj++)
     add(State({ti != tj ? train[tj].second : core::empty(train[tj].second.sz)}, false, 10), true);
-
-  // add(State({greedyFillBlack2(in)}, false, 10), true);
-
-  // filterCol?
 
   givens = tiny_node.size();
 }
@@ -427,26 +472,37 @@ void DAG::benchmark()
     printf("%.1f ms - %s\n", t * 1e3, funcs.getName(fi).c_str());
 }
 
+static int outputCount = 0;
+
+bool doesNotStartWith(const std::string& str, const std::string& prefix) {
+    return str.compare(0, prefix.length(), prefix) != 0;
+}
+
 int DAG::applyFunc(int curi, int fi, const State &state)
 {
-
   find_child_time.start();
-  // auto it = lower_bound(node[curi].child.begin(), node[curi].child.end(), make_pair(fi,-1));
   int it2 = tiny_node.getChild(curi, fi);
   find_child_time.stop();
   if (it2 != TinyChildren::None)
-  { // it != node[curi].child.end() && it->first == fi) {
-    // if (it2 != it->second) cout << it2 << ' ' << it->second << endl;
-    // assert(it2 == it->second);
-    return it2; // it->second;
+  {
+    return it2;
   }
-  // assert(it2 == -2);
 
   State nxt;
   nxt.depth = tiny_node[curi].depth + funcs.cost[fi];
-  // nxt.par = curi;
 
   int newi = -1;
+
+  if( outputCount < 10
+   && funcs.getName(fi) != "moveToCorner"
+   && funcs.getName(fi) != "composeGrowing"
+   && doesNotStartWith(funcs.getName(fi), "colShape")
+   && doesNotStartWith(funcs.getName(fi), "toOrigin")
+   && doesNotStartWith(funcs.getName(fi), "embed"))
+  {
+    std::cout << "Apply: " << funcs.getName(fi) << endl;
+    outputCount++;
+  }
 
   apply_f_time.start();
   bool ok = funcs.f_list[fi](state, nxt);
@@ -454,15 +510,13 @@ int DAG::applyFunc(int curi, int fi, const State &state)
 
   if (ok)
   {
-    // nxt.pfi = fi;
     newi = add(nxt);
   }
 
   add_child_time.start();
   tiny_node.addChild(curi, fi, newi);
-  // node[curi].child.emplace_back(fi, newi);
-  // sort(node[curi].child.begin(), node[curi].child.end());
   add_child_time.stop();
+
   return newi;
 }
 
@@ -566,7 +620,9 @@ vector<DAG> brutePieces2(Image_ test_in, const vector<pair<Image, Image>> &train
 
   int all_train_out_mask = 0, and_train_out_mask = ~0;
   for (int ti = 0; ti < train.size(); ti++)
+  {
     and_train_out_mask &= core::colMask(train[ti].second);
+  }
 
   // loop through each training image and add the test image at the end
   for (int ti = 0; ti <= train.size(); ti++)
@@ -596,8 +652,7 @@ vector<DAG> brutePieces2(Image_ test_in, const vector<pair<Image, Image>> &train
     dag[ti].build();
     if (print)
       cout << now() - start_time << endl;
-    // dag[ti].buildBinary();
-    // if (print) cout << now()-start_time << endl;
+
     dag[ti].applyFunc("composeGrowing", 1);
     if (print)
       cout << now() - start_time << endl;

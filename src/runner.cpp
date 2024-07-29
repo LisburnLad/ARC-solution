@@ -76,7 +76,7 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
   // These operations are currently not executed, but they hint at the possible functionalities that can be included in this function.
   // rankFeatures();
   // evalNormalizeRigid();
-  // evalTasks();
+  // evalTasks(0);
   // bruteSubmission();
   // bruteSolve();
   // evalEvals(1);
@@ -126,8 +126,7 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
 
     // Normalize sample
     Simplifier sim = normalizeCols(s.train);
-    if (no_norm)
-      sim = normalizeDummy(s.train);
+    if (no_norm) sim = normalizeDummy(s.train);
 
     vector<pair<Image, Image>> train;
     for (auto &[in, out] : s.train)
@@ -153,14 +152,17 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
       write(s.train[testIndex].first, "s_train_first.csv");
       write(s.train[testIndex].second, "s_train_second.csv");
 
-      cout << "Original Input" << endl;
-      print(s.train[testIndex].first);
 
-      cout << "Normalised Input" << endl;
-      print(train[testIndex].first);
+      for( int index = 0; index < train.size(); index++ ) {
+        cout << index << ". Original Input" << endl;
+        print(s.train[index].first);
 
-      cout << "Normalised Output" << endl;
-      print(train[testIndex].second);
+        cout << index << ". Normalised Input" << endl;
+        print(train[index].first);
+
+        cout << index << ". Normalised Output" << endl;
+        print(train[index].second);
+      }
 
       write(train[testIndex].first, "train_first_norm.csv");
       write(train[testIndex].second, "train_second_norm.csv");
@@ -191,6 +193,7 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
         // Update maximum number of colors
         macols = max(macols, __builtin_popcount(core::colMask(in)));
       }
+
       // Determine the larger sum size between input and output
       int sumsz = max(insumsz, outsumsz);
 
@@ -217,6 +220,7 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
 
     // Generate candidate pieces
     Pieces pieces;
+
     {
       // Record start time for performance measurement
       double start_time = now();
@@ -300,11 +304,17 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
 
     // Begin assembling pieces into candidates
     vector<Candidate> cands;
+
     {
       // Record start time for performance measurement
       double start_time = now();
 
       // Compose pieces into candidates based on the training data and output sizes
+      // pieces -> contains: dag[ number of training samples + test].target_size = size of expected output for each
+      // out_sizes -> array of output sizes for training samples + test
+      //
+      // returns:
+      // cands -> array of candidates, one for each training sample and one for the test
       cands = composePieces2(pieces, train, out_sizes);
 
       // If time logging is enabled, print the time taken to compose pieces
@@ -485,11 +495,10 @@ void runSingleFile(const string &aFileName, int arg = -1)
 
 void run(int only_sid = -1, int arg = -1)
 {
+  int eval = 1;
 
-  int eval = 0;
-
-  // string sample_dir = "evaluation";
-  string sample_dir = "training";
+  string sample_dir = "evaluation";
+  // string sample_dir = "training";
   int samples = -1;
   if (eval)
   {

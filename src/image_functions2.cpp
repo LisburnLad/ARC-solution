@@ -7,6 +7,8 @@ using namespace std;
 #include "read.hpp"
 #include "normalize.hpp"
 
+extern vImage global_img_v;
+
 vImage splitAll(Image_ img)
 {
   vector<Image> ret;
@@ -765,6 +767,114 @@ Image myStack(vImage_ lens, int id)
   return out;
 }
 
+Image moveToCorner(vImage_ imgs)
+{
+  int n = imgs.size();
+  if (!n)
+    return badImg;
+  else if (n == 1 || global_img_v.size() == 0)
+    return imgs[0];
+
+  // calculate the size of the global output shapes
+  int width = 0;
+  int height = 0;
+  for( int index = 0; index < global_img_v.size(); index++ )
+  {
+    int w = global_img_v[index].p.x + global_img_v[index].sz.x;
+    int h = global_img_v[index].p.y + global_img_v[index].sz.y;
+
+    if( w > width ) width = w;
+    if( h > height ) height = h;
+  }
+
+  if( width > 13 || height > 13 ) {
+    return imgs[0];
+  }
+
+  // create a blank image and for every shape that matches a shape in the training output,
+  // move it from the test input image to the blank image, with the same position as training
+  Image ret = core::empty(point{0, 0}, point{width,height});
+  for (Image_ img : imgs)
+  {
+    for( int index = 0; index < global_img_v.size(); index++ )
+    {
+      if( core::binaryCompare( img, global_img_v[index]) )
+      {
+        for(int row = 0; row < img.sz.y; row++)
+          for(int col = 0; col < img.sz.x; col++)
+            ret(row+global_img_v[index].p.y, col+global_img_v[index].p.x) = img(row,col);
+      }
+    }
+  }
+
+  return ret;
+}
+
+// push corner shapes into the corners
+Image moveToCornerHIDE(vImage_ imgs)
+{
+  int n = imgs.size();
+  if (!n)
+    return badImg;
+  else if (n == 1)
+    return imgs[0];
+
+  int width = 0;
+  int height = 0;
+  for (Image_ img : imgs)
+  {
+    width += img.sz.x;
+    height += img.sz.y;
+  }
+
+  if( width > 13 || height > 13 ) {
+    return imgs[0];
+  }
+
+  Image ret = core::empty(point{0, 0}, point{width,height});
+
+  const Image topLeft = {{0, 0}, {2, 2}, {1,1,1,0}};
+  const Image topRight = {{0, 0}, {2, 2}, {1,1,0,1}};
+  const Image bottomLeft = {{0, 0}, {2, 2}, {1,0,1,1}};
+  const Image bottomRight = {{0, 0}, {2, 2}, {0,1,1,1}};
+
+  for (Image_ img : imgs)
+  {
+    int mask = core::colMask(img);
+    Image maskImg = core::empty(point{0, 0}, point{img.sz.x,img.sz.y});
+    for(int x = 0; x < img.sz.x; x++)
+      for(int y = 0; y < img.sz.y; y++)
+        maskImg(x,y) = img(x,y) > 0;
+
+    if( maskImg == topLeft )
+    {
+      for(int row = 0; row < img.sz.y; row++)
+        for(int col = 0; col < img.sz.x; col++)
+          ret(row,col) = img(row,col);
+    }
+    else if( maskImg == topRight )
+    {
+      for(int row = 0; row < img.sz.y; row++)
+        for(int col = 0; col < img.sz.x; col++)
+          ret(row,col+(width-2)) = img(row,col);
+    }
+    else if( maskImg == bottomLeft )
+    {
+      for(int row = 0; row < img.sz.y; row++)
+        for(int col = 0; col < img.sz.x; col++)
+          ret(row+(height-2),col) = img(row,col);
+    }
+    else if( maskImg == bottomRight )
+    {
+      for(int row = 0; row < img.sz.y; row++)
+        for(int col = 0; col < img.sz.x; col++)
+          ret(row+(height-2),col+(width-2)) = img(row,col);
+    }
+  }
+
+  return ret;
+}
+
 Image stackLine(vImage_ shapes)
 {
   int n = shapes.size();
@@ -822,6 +932,7 @@ Image composeGrowingSlow(vImage_ imgs)
   return ret;
 }
 
+
 Image composeGrowing(vImage_ imgs)
 {
   int n = imgs.size();
@@ -864,7 +975,6 @@ Image composeGrowing(vImage_ imgs)
       }
     }
   }
-  // assert(ret == composeGrowingSlow(imgs));
   return ret;
 }
 

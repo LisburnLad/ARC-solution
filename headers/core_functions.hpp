@@ -11,4 +11,5 @@ namespace core {
   char majorityCol(Image_ img, int include0 = 0);
   Image subImage(Image_ img, point p, point sz);
   vector<pair<Image,int>> splitCols(Image_ img, int include0 = 0);
+  bool binaryCompare(Image img, Image img2 );
 };
