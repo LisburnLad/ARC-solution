@@ -1,7 +1,3 @@
-/*#include <vector>
-#include <regex>
-#include <cassert>
-#include <iostream>*/
 #include "precompiled_stl.hpp"
 #include <experimental/filesystem>
 
@@ -144,6 +140,7 @@ Image Sample::readImage() {
 vector<Sample> readSingleFile(const string& filename)
 {
   // make sure we can find the path
+  DEBUG_TRACE("Looking for file: " << filename << endl);
   assert(experimental::filesystem::exists(filename));
 
   vector<Sample> sample;
@@ -154,19 +151,18 @@ vector<Sample> readSingleFile(const string& filename)
   return sample;
 }
 
-vector<Sample> readAll(string path, int maxn) { //maxn = -1
-  // const string base_path[2] = {"./abstraction-and-reasoning-challenge/", "./dataset/"};
-  const string base_path[2] = {"./dataset/", "../../dataset/"};
-
+vector<Sample> readAll(string path, int maxn) {
+  const string base_path[2] = {"/kaggle/working/abstraction-and-reasoning-challenge/",
+                               "blablabla/kaggle/working/abstraction-and-reasoning-challenge/"};
 
   int base_pathi = 0;
   while (!experimental::filesystem::exists(base_path[base_pathi]+path)) {
-    std::cout << "Couldn't Find Path = " << base_path[base_pathi]+path << endl;
+    DEBUG_TRACE("Couldn't Find Path = " << base_path[base_pathi]+path << endl);
     base_pathi++;
     assert(base_pathi < 2);
   }
 
-  // std::cout << "Found Path = " << base_path[base_pathi]+path << endl;
+  DEBUG_TRACE("Found Path = " << base_path[base_pathi]+path << endl);
 
   vector<string> files;
   for (auto magic_file_type : experimental::filesystem::directory_iterator(base_path[base_pathi]+path)) {
@@ -178,9 +174,7 @@ vector<Sample> readAll(string path, int maxn) { //maxn = -1
   if (maxn >= 0) files.resize(maxn);
   vector<Sample> sample;
   for (string sid : files) {
-    //sample.push_back(Sample(sid));
     for (Sample s : Sample(sid).split()) {
-      //if (maxn < 0 || sample.size() < maxn)
       sample.push_back(s);
     }
   }
@@ -188,7 +182,7 @@ vector<Sample> readAll(string path, int maxn) { //maxn = -1
 }
 
 
-Writer::Writer(string filename) { //filename = "submission_part.csv"
+Writer::Writer(string filename) {
   filename = filename;
   fp = fopen(filename.c_str(), "w");
   assert(fp);
@@ -196,8 +190,6 @@ Writer::Writer(string filename) { //filename = "submission_part.csv"
 }
 
 void Writer::operator()(const Sample& s, vector<Image> imgs) {
-  //int cnt = seen[s.id]++;
-  //assert(cnt == s.id_ind);
   fprintf(fp, "%s_%d,", s.id.c_str(), s.id_ind);
   //TODO: is empty output allowed? Looks like no!
   if (imgs.empty()) imgs = {dummyImg};
