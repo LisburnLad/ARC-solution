@@ -1,13 +1,27 @@
 #!/usr/bin/env python
 
-run_list = range(0,419)
-run_depth = 2
 
 from subprocess import call
 from concurrent.futures import ThreadPoolExecutor as Pool
 import os
 import sys
 from random import *
+
+def count_files(directory):
+    # List all files in the directory
+    files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+    return len(files)
+
+# Example usage
+# directory_path = 'dataset/training'
+# directory_path = 'dataset/evaluation'
+directory_path = 'dataset/test'
+file_count = count_files(directory_path)
+print(f"There are {file_count} files in the directory '{directory_path}'")
+
+run_list = range(0,file_count)
+run_depth = 2
+
 
 version = str(randint(0,10**9))
 if len(sys.argv) == 2: version = sys.argv[1]
@@ -25,6 +39,7 @@ def outdated(i):
     t = f.read()
     f.close()
     return t != version
+
 def update(i):
     fn = 'store/version/%d.txt'%i
     os.system('touch '+fn)

@@ -153,7 +153,8 @@ vector<Sample> readSingleFile(const string& filename)
 
 vector<Sample> readAll(string path, int maxn) {
   const string base_path[2] = {"/kaggle/working/abstraction-and-reasoning-challenge/",
-                               "blablabla/kaggle/working/abstraction-and-reasoning-challenge/"};
+                               "dataset/"};
+                              //  "notebooks/kaggle/working/abstraction-and-reasoning-challenge/"};
 
   int base_pathi = 0;
   while (!experimental::filesystem::exists(base_path[base_pathi]+path)) {

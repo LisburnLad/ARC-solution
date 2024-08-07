@@ -21,3 +21,10 @@ and creates its submission file in: notebooks/absres-c-files/submission_part.csv
 
 In the Jupyter Notebook this "submission_part.csv" is copied to a file "old_submission.csv" and from there translated into the new submission format,
 creating a file: "sub_icecube.json"
+
+
+# Results:
+
+7/8/24 - 182/400 Training Problems Correct
+         122/400 Evaluation Problems Correct
+         24/100  Test Problems Correct

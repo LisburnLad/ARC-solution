@@ -40,7 +40,21 @@ for line in combined:
 outf.close()
 exit(0)
 """
-inds = range(0,419)
+import os
+
+def count_files(directory):
+    # List all files in the directory
+    files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+    return len(files)
+
+# Example usage
+# directory_path = 'dataset/training'
+# directory_path = 'dataset/evaluation'
+directory_path = 'dataset/test'
+file_count = count_files(directory_path)
+print(f"There are {file_count} files in the directory '{directory_path}'")
+
+inds = range(0,file_count)
 
 inds = list(inds)
 compressed = ''
