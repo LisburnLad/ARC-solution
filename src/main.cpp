@@ -1,3 +1,4 @@
+#include "precompiled_stl.hpp"
 #include "runner.hpp"
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,17 +23,17 @@ int main(int argc, char**argv) {
     if( has_only_digits )
     {
       only_sid = atoi(filename.c_str());
-      printf("Running only task # %d\n", only_sid);
+      DEBUG_TRACE("Running only task # " << only_sid << endl);
     }
     else
     {
-      cout << "Runing for single file: " << filename << endl;
+      DEBUG_TRACE( "Runing for single file: " << filename << endl);
     }
   }
   int maxdepth = -1;
   if (argc >= 3) {
     maxdepth = atoi(argv[2]);
-    printf("Using max depth %d\n", maxdepth);
+    DEBUG_TRACE("Using max depth " << maxdepth << endl);
   }
 
   if( only_sid == -1 && filename.length() > 0)

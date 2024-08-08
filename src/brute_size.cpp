@@ -162,7 +162,7 @@ point solveSize(vector<vector<point>> &seeds, const vector<point> &target)
     add(combined, combloss);
   }
 
-  // cout << best.first << ' ' << target.size() << ' ' << best.second << endl;
+  // DEBUG_TRACE( best.first << ' ' << target.size() << ' ' << best.second << endl);
   // assert(best.first == target.size());
   return ans;
 }
@@ -192,8 +192,8 @@ vector<point> bruteSize(Image_ test_in, vector<pair<Image, Image>> train)
   for (auto [in, out] : train)
     target.push_back(out.sz);
 
-  // cout << pieces.piece.size() << endl;
-  // cout << pieces.seen.size() << endl;
+  // DEBUG_TRACE( pieces.piece.size() << endl);
+  // DEBUG_TRACE( pieces.seen.size() << endl);
   vector<vector<point>> seeds;
   set<vector<point>> seen;
   for (Piece3 &p : pieces.piece)

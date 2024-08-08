@@ -214,7 +214,7 @@ Pieces makePieces2(vector<DAG> &dag, vector<pair<Image, Image>> train, vector<po
         // {
         //   // Get the index of the training set
         //   int i = train.size();
-          
+
         //   // Get the child index for the current node and function index
         //   int to = dag[i].tiny_node.getChild(ind[i], fi);
 
@@ -306,7 +306,7 @@ Pieces makePieces2(vector<DAG> &dag, vector<pair<Image, Image>> train, vector<po
   //       // Debugging output (currently disabled)
   //       if (0)
   //       {
-  //         cout << p << ' ' << di << " / " << train.size() << endl;
+  //         DEBUG_TRACE( p << ' ' << di << " / " << train.size() << endl);
   //       }
   //       // Update the current node to the child node
   //       p = ret;
@@ -323,7 +323,7 @@ Pieces makePieces2(vector<DAG> &dag, vector<pair<Image, Image>> train, vector<po
   //   // Check if the vector of node indices has been seen before
   //   if (!seen.insert(hashVec(look_v), 0).second)
   //     // Output a message if the indices have been found before
-  //     cout << "Found indices" << endl;
+  //     DEBUG_TRACE( "Found indices" << endl);
   // };
 
   if (out_sizes.size() && print_nodes)
@@ -331,8 +331,8 @@ Pieces makePieces2(vector<DAG> &dag, vector<pair<Image, Image>> train, vector<po
     int nodes = 0;
     for (DAG &d : dag)
       nodes += d.tiny_node.size();
-    cout << "Nodes:  " << nodes << endl;
-    cout << "Pieces: " << pieces.piece.size() << endl;
+    DEBUG_TRACE( "Nodes:  " << nodes << endl);
+    DEBUG_TRACE( "Pieces: " << pieces.piece.size() << endl);
   }
   pieces.dag = move(dag);
 

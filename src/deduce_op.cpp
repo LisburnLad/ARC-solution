@@ -224,7 +224,7 @@ deduceOuterProduct::deduceOuterProduct(vector<pair<Image, Image>> train)
     // print(b);
     // print(train[ti].second);
     assert(reconstruct(a, b) == train[ti].second);
-    // cout << "OK" << endl;
+    // DEBUG_TRACE( "OK" << endl);
   }
 }
 

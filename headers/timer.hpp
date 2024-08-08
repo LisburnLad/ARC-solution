@@ -1,5 +1,7 @@
 #include <chrono>
 
+// #define TIMERTRACE
+
 struct Timer {
   const int skips = 100, brute_thres = 1000;
   bool running = false;
@@ -46,8 +48,12 @@ struct Timer {
     double var = (sample_var/samples-mean*mean)/(samples-1);
     return {cnt, mean*cnt, sqrt(var)*cnt};
   }
-  void print(const string& label) {
-    auto [cnt,sum,std] = read();
-    printf("%5.1f ± %4.1f ms - %s\n", sum*1e3, std*1e3, label.c_str());
+
+  void print(const string& label)
+  {
+    #ifdef TIMERTRACE
+      auto [cnt,sum,std] = read();
+      printf("%5.1f ± %4.1f ms - %s\n", sum*1e3, std*1e3, label.c_str());
+    #endif
   }
 };

@@ -34,7 +34,7 @@ Sample::Sample(string filename) {
 	} else if (train_test == "test" && input_output == "output") {
 	  test_output.push_back(img);
 	} else {
-	  cerr << train_test << ' ' << input_output << endl;
+	  DEBUG_TRACE( train_test << ' ' << input_output << endl);
 	  assert(!"Unexpected tag");
 	}
 	if (end('}')) break;
@@ -86,7 +86,7 @@ int Sample::end(char endc) {
     return 0;
   } else {
     if (c != endc)
-      cerr << "|"<<c<<"|" << " != " << "|"<<endc<<"|" << endl;
+      DEBUG_TRACE( "|"<<c<<"|" << " != " << "|"<<endc<<"|" << endl);
     assert(c == endc);
     return 1;
   }
@@ -94,7 +94,7 @@ int Sample::end(char endc) {
 void Sample::expect(char c) {
   char got = mygetc();
   if (got != c)
-    cerr << "|"<<got<<"|" << " != " << "|"<<c<<"|" << endl;
+    DEBUG_TRACE( "|"<<got<<"|" << " != " << "|"<<c<<"|" << endl);
   assert(got == c);
 }
 string Sample::getQuote() {

@@ -125,10 +125,8 @@ struct UniquePicker
       for (int fi = 0; fi < nfeats; fi++)
       {
         best = max(best, make_pair(score[fi], fi));
-        // cout << score[fi] << '-' << fi << "  ";
       }
-      // cout << endl;
-      // cout << best.first << '-' << best.second << endl;
+
       int pickf = best.second;
       assert(pickf != -1);
       feature_dim.push_back(pickf);
@@ -141,10 +139,6 @@ struct UniquePicker
         cols_left[inpi]--;
       }
     }
-
-    // for (int i : feature_dim) cout << i << endl;
-    // cout << endl;
-    // exit(0);
   }
 
   double diff(double a, double b) const
@@ -177,9 +171,9 @@ struct UniquePicker
           break;
       }
       best = max(best, make_pair(score, i));
-      // cout << score << ' ';
+      // DEBUG_TRACE( score << ' ';
     }
-    // cout << endl;
+    // DEBUG_TRACE( endl);
     // exit(0);
     assert(best.first != -1);
     return best.second;
@@ -373,7 +367,7 @@ void normalizeCols(vector<Sample> &sample)
       }
     }
   }
-  cout << count << " tasks" << endl;
+  DEBUG_TRACE(count << " tasks" << endl);
 }
 
 // Needs rigid:

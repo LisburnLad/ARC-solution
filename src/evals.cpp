@@ -766,11 +766,11 @@ void evalEvals(int print = 1) {
     }
     corrects += ok;
     if (print)
-      cout << "Task " << si << ": " << (ok ? "OK" : "Failed") << endl;
+      DEBUG_TRACE( "Task " << si << ": " << (ok ? "OK" : "Failed") << endl);
   }
 
   if (print) {
-    cout << corrects << " / " << sample.size() << endl;
+    DEBUG_TRACE( corrects << " / " << sample.size() << endl);
     exit(0);
   }
   if (!print)

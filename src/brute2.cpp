@@ -36,7 +36,7 @@ Timer state_time;
 
 void Functions3::add(const string &name, int cost_, const function<bool(const State &, State &)> &func, int list)
 {
-  // if (cost_ != 10) cout << name << endl;
+  // if (cost_ != 10) DEBUG_TRACE( name << endl);
   // assert(cost_ == 10);
   if (list)
     listed.push_back(names.size());
@@ -164,7 +164,7 @@ int Functions3::findfi(string name)
   int fi = find(names.begin(), names.end(), name) - names.begin();
   if (fi == names.size())
   {
-    cerr << name << " is not a known function" << endl;
+    DEBUG_TRACE( name << " is not a known function" << endl);
     assert(0);
   }
   return fi;
@@ -320,7 +320,7 @@ Functions3 initFuncs3(const vector<point> &sizes)
   static int said = 0;
   if (!said)
   {
-    cout << "Function count: " << funcs.listed.size() << endl;
+    DEBUG_TRACE( "Function count: " << funcs.listed.size() << endl);
     said = 1;
   }
 
@@ -510,7 +510,7 @@ int DAG::applyFunc(int curi, int fi, const State &state)
    && doesNotStartWith(funcs.getName(fi), "toOrigin")
    && doesNotStartWith(funcs.getName(fi), "embed"))
   {
-    std::cout << "Apply: " << funcs.getName(fi) << endl;
+    DEBUG_TRACE( "Apply: " << funcs.getName(fi) << endl);
     outputCount++;
   }
 
@@ -615,7 +615,7 @@ void DAG::buildBinary()
       nxt.isvec = false;
       binary[fa * fis + fb] = add(nxt);
       /*if (binary[fa*fis+fb] != memi[fa]) {
-  cout << binary[fa*fis+fb] << ' ' << memi[fa] << ' ' << tiny_node.size() << endl;
+  DEBUG_TRACE( binary[fa*fis+fb] << ' ' << memi[fa] << ' ' << tiny_node.size() << endl);
       }
       assert(binary[fa*fis+fb] == memi[fa]);*/
     }
@@ -649,7 +649,7 @@ vector<DAG> brutePieces2(Image_ test_in, const vector<pair<Image, Image>> &train
     if (out_sizes.size())
       sizes.push_back(out_sizes[ti]);
 
-    cout << "Train Size = " << train.size() << " Sizes Array = " << sizes.size() << endl;
+    DEBUG_TRACE( "Train Size = " << train.size() << " Sizes Array = " << sizes.size() << endl);
 
     // add each of the transform functions
     dag[ti].funcs = initFuncs3(sizes);
@@ -661,11 +661,11 @@ vector<DAG> brutePieces2(Image_ test_in, const vector<pair<Image, Image>> &train
     double start_time = now();
     dag[ti].build();
     if (print)
-      cout << now() - start_time << endl;
+      DEBUG_TRACE( now() - start_time << endl);
 
     dag[ti].applyFunc("composeGrowing", 1);
     if (print)
-      cout << now() - start_time << endl;
+      DEBUG_TRACE( now() - start_time << endl);
 
     if (sizes.size() > 1)
     {
@@ -682,7 +682,7 @@ vector<DAG> brutePieces2(Image_ test_in, const vector<pair<Image, Image>> &train
       dag[ti].applyFuncs(toapply, 0);
 
       if (print)
-        cout << now() - start_time << endl;
+        DEBUG_TRACE( now() - start_time << endl);
 
       total_time.stop();
       total_time.print("Total time");
@@ -697,54 +697,17 @@ vector<DAG> brutePieces2(Image_ test_in, const vector<pair<Image, Image>> &train
       map_time.print("Map");
 
       state_time.print("getState");
-      // exit(0);
-
-      // FILE*fp = fopen("images.txt", "w");
-      // for (Node &n : dag[ti].node)
-      // {
-      //   for (Image_ img : n.vimg)
-      //   {
-      //     fprintf(fp, "%d %d %d %d\n", img.x, img.y, img.w, img.h);
-      //     for (char c : img.mask)
-      //       fprintf(fp, "%c", '0' + c);
-      //     fprintf(fp, "\n");
-      //   }
-      // }
-
-      // exit(0);
-      // dag[ti].freeAll();
     }
     else
       total_time.stop();
-    // dag[ti].benchmark();
-    // exit(0);
-
-    /*
-    for (Node&n : dag[ti].node) {
-      if (!n.isvec && n.pfi == dag[ti].embed1fi) {
-  n.vimg.clear();
-  n.vimg.shrink_to_fit();
-      }
-    }
-    */
-
-    /*if (ti < train.size()) {
-      for (Node&n : dag[ti].node) {
-  if (n.par > -1 && (n.isvec || n.img[0].w > 30 || n.img[0].h > 30)) {// || n.img[0].p != point{0,0} || n.img[0].sz != given_sizes[ti][1])) {
-    n.img.clear();
-    n.img.shrink_to_fit();
-  }
-      }
-      dag[ti].hashi.clear();
-      }*/
   }
 
   if (out_sizes.size() && print_nodes)
   {
-    cout << "Dag sizes: ";
+    DEBUG_TRACE( "Dag sizes: ");
     for (int i = 0; i < dag.size(); i++)
-      cout << dag[i].tiny_node.size() << " ";
-    cout << endl;
+      DEBUG_TRACE( dag[i].tiny_node.size() << " ");
+    DEBUG_TRACE( endl);
   }
 
   return dag;

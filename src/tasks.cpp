@@ -17,7 +17,7 @@ Image solveTask(const Image &img, const vector<pair<Image, Image>> &train, int t
     // get the shapes in the input image
     vImage img_1_v = splitAll(img);
     Image img_2 = moveToCorner(img_1_v);
-    cout << "moveToCorner" << endl;
+    DEBUG_TRACE( "moveToCorner" << endl);
     print(img_2);
     // Image filtered = filterCol(img_2, 1);
     // print(filtered);
@@ -100,7 +100,7 @@ Image solveTask(const Image &img, const vector<pair<Image, Image>> &train, int t
   {
     print(img);
     Image blue = filterCol(img, 1);
-    cout << "blue: " << endl;
+    DEBUG_TRACE( "blue: " << endl);
     print(blue);
     Image red = compress(filterCol(img, 2));
     print(red);
@@ -544,7 +544,7 @@ void evalTasks(int aTaskIndex)
       }
 
       Image pred = solveTask(s.test[0].first, s.train, si);
-      cout << "Task " << si << " (" << s.id << ") : " << (pred == s.test[0].second ? "OK" : "Failed") << endl;
+      DEBUG_TRACE( "Task " << si << " (" << s.id << ") : " << (pred == s.test[0].second ? "OK" : "Failed") << endl);
       corrects += (pred == s.test[0].second);
       if (pred != s.test_out)
       {
@@ -554,13 +554,13 @@ void evalTasks(int aTaskIndex)
         for (auto [in, out] : s.train)
           visu.add(in, out);
 
-        cout << "Test Output:" << endl;
+        DEBUG_TRACE( "Test Output:" << endl);
         print(s.test[0].second);
-        cout << "Predicted:" << endl;
+        DEBUG_TRACE( "Predicted:" << endl);
         print(pred);
       }
     }
   }
-  cout << corrects << " / " << sample.size() << endl;
+  DEBUG_TRACE( corrects << " / " << sample.size() << endl);
   exit(0);
 }

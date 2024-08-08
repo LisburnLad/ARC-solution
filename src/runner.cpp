@@ -47,16 +47,16 @@ void writeVerdict(int si, string sid, int verdict)
   switch (verdict)
   {
   case 3:
-    cout << green("Correct") << endl;
+    cout << "Correct" << endl;
     break;
   case 2:
-    cout << yellow("Candidate") << endl;
+    cout << "Candidate" << endl;
     break;
   case 1:
-    cout << blue("Dimensions") << endl;
+    cout << "Dimensions" << endl;
     break;
   case 0:
-    cout << red("Nothing") << endl;
+    cout << "Nothing" << endl;
     break;
   default:
     assert(0);
@@ -117,16 +117,17 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
       load();
     else if (++dones % 10 == 0)
     {
-      cout << dones << " / " << sample.size() << endl;
+      DEBUG_TRACE(dones << " / " << sample.size() << endl);
     }
 
     const Sample &s = sample[si];
 
-    cout << "Processing: " << s.id << endl;
+    DEBUG_TRACE("Processing: " << s.id << endl);
 
     // Normalize sample
     Simplifier sim = normalizeCols(s.train);
-    if (no_norm) sim = normalizeDummy(s.train);
+    if (no_norm)
+      sim = normalizeDummy(s.train);
 
     vector<pair<Image, Image>> train;
     for (auto &[in, out] : s.train)
@@ -146,24 +147,24 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
     auto [test_in, test_out] = sim(s.test_in, s.test_out);
 
     // the index of the image to write for testing
-    int testIndex = 1;
+    int testIndex = -1;
     if (testIndex >= 0)
     {
       write(s.train[testIndex].first, "s_train_first.csv");
       write(s.train[testIndex].second, "s_train_second.csv");
 
-      for( int index = 0; index < train.size(); index++ )
+      for (int index = 0; index < train.size(); index++)
       {
-        if( index < s.train.size())
+        if (index < s.train.size())
         {
-          cout << index << ". Original Input" << endl;
+          DEBUG_TRACE(index << ". Original Input" << endl);
           print(s.train[index].first);
         }
 
-        cout << index << ". Normalised Input" << endl;
+        DEBUG_TRACE(index << ". Normalised Input" << endl);
         print(train[index].first);
 
-        cout << index << ". Normalised Output" << endl;
+        DEBUG_TRACE(index << ". Normalised Output" << endl);
         print(train[index].second);
       }
 
@@ -286,7 +287,7 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
       inds += sizeof(pieces.mem[0]) * pieces.mem.size();
 
       // Print total memory usage for each component in megabytes
-      printf("Memory: %.1f + %.1f + %.1f + %.1f + %.1f MB\n", size / 1e6, child / 1e6, other / 1e6, maps / 1e6, inds / 1e6);
+      // DEBUG_TRACE("Memory: %.1f + %.1f + %.1f + %.1f + %.1f MB\n", size / 1e6, child / 1e6, other / 1e6, maps / 1e6, inds / 1e6);
     }
 
     // Clear hash maps and children in all DAGs to free memory
@@ -474,8 +475,8 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
       writeVerdict(si, s.id, verdict[si]);
     }
     for (int si = 0; si < sample.size(); si++)
-      cout << verdict[si];
-    cout << endl;
+      DEBUG_TRACE(verdict[si]);
+    DEBUG_TRACE(endl);
 
     for (int i = 3; i; i--)
       scores[i - 1] += scores[i];
