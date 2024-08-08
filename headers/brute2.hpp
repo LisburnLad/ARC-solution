@@ -76,12 +76,13 @@ struct DAG {
   Image getImg(int nodei);
   void build();
   void buildBinary();
-  void initial(Image_ test_in, const vector<pair<Image,Image>>&train, vector<point> sizes, int ti);
+  void initial(Image_ test_in, const vector<pair<Image, Image>> &train, vector<point> sizes, int ti);
+  void FindMatchingImageParts(const std::vector<std::pair<Image, Image>> &train);
   void benchmark();
-  int applyFunc(int curi, int fi, const State&state);
+  int applyFunc(int curi, int fi, const State &state);
   int applyFunc(int curi, int fi);
   void applyFunc(string name, bool vec);
-  void applyFuncs(vector<pair<string,int>> names, bool vec);
+  void applyFuncs(vector<pair<string, int>> names, bool vec);
 };
 
 

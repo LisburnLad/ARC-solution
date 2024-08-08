@@ -37,7 +37,27 @@ Image solveTask(const Image &img, const vector<pair<Image, Image>> &train, int t
     print(final);
     return final;
   }
-  else if (taski == 2 || taski == 3)
+  else if (taski == 2)
+  {
+    print(img);
+
+    auto sim = normalizeCols(train);
+    auto in0 = img;
+    Image in = sim.in(img);
+
+    // Image out = badImg;
+    // vImage img_1_v = splitByColor(in);
+    // for (Image colorImg : img_1_v) {
+    //   out = compose(out, align(colorImg, out, 2, 2));
+    //   print(out);
+    // }
+
+    Image out = composeByColor(in);
+    print(out);
+
+    return sim.rec(in0,out);
+  }
+  else if (taski == 3)
   {
     return interior(filterCol(img, 2));
   }

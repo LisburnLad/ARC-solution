@@ -25,6 +25,11 @@ creating a file: "sub_icecube.json"
 
 # Results:
 
-7/8/24 - 182/400 Training Problems Correct
+6/8/24 - 182/400 Training Problems Correct
          122/400 Evaluation Problems Correct
          24/100  Test Problems Correct
+
+7/8/24 - Fixed training problem 'c8cbb738' by adding new functions: splitByColor and composeByColor
+         184/400 Training Problems Correct
+         127/400 Evaluation Problems Correct
+         27/100  Test Problems Correct

@@ -48,9 +48,9 @@ def count_files(directory):
     return len(files)
 
 # Example usage
-# directory_path = 'dataset/training'
+directory_path = 'dataset/training'
 # directory_path = 'dataset/evaluation'
-directory_path = 'dataset/test'
+# directory_path = 'dataset/test'
 file_count = count_files(directory_path)
 print(f"There are {file_count} files in the directory '{directory_path}'")
 

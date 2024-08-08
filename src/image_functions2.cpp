@@ -9,6 +9,24 @@ using namespace std;
 
 extern vImage global_img_v;
 
+// create a vector of images from a single image
+// - each image contains a single color
+vImage splitByColor(Image_ img)
+{
+  vector<Image> ret;
+  int maxColor = core::countCols(img);
+  for( int color = 2; color <= maxColor; color++ )
+  {
+    Image filtered = compress(filterCol(img, color));
+    if (core::count(filtered))
+    {
+      ret.push_back(filtered);
+    }
+  }
+
+  return ret;
+}
+
 vImage splitAll(Image_ img)
 {
   vector<Image> ret;
@@ -38,8 +56,7 @@ vImage splitAll(Image_ img)
             toadd(i, j) = max(0, toadd(i, j) - 1);
           }
         }
-        // Image i = interior(toadd);
-        // if (!core::count(compose(img,i,2)))
+
         if (core::count(toadd))
           ret.push_back(toadd);
       }
@@ -708,6 +725,16 @@ Image mirror2(Image_ a, Image_ line)
   return ret;
 }
 
+Image composeByColor(Image_ img)
+{
+  Image out = badImg;
+  vImage colorLayers = splitByColor(img);
+  for (Image colorImg : colorLayers) {
+    out = compose(out, align(colorImg, out, 2, 2));
+  }
+  return out;
+}
+
 vImage gravity(Image_ in, int d)
 {
   vImage pieces = splitAll(in);
@@ -810,70 +837,70 @@ Image moveToCorner(vImage_ imgs)
   return ret;
 }
 
-// push corner shapes into the corners
-Image moveToCornerHIDE(vImage_ imgs)
-{
-  int n = imgs.size();
-  if (!n)
-    return badImg;
-  else if (n == 1)
-    return imgs[0];
+// // push corner shapes into the corners
+// Image moveToCornerHIDE(vImage_ imgs)
+// {
+//   int n = imgs.size();
+//   if (!n)
+//     return badImg;
+//   else if (n == 1)
+//     return imgs[0];
 
-  int width = 0;
-  int height = 0;
-  for (Image_ img : imgs)
-  {
-    width += img.sz.x;
-    height += img.sz.y;
-  }
+//   int width = 0;
+//   int height = 0;
+//   for (Image_ img : imgs)
+//   {
+//     width += img.sz.x;
+//     height += img.sz.y;
+//   }
 
-  if( width > 13 || height > 13 ) {
-    return imgs[0];
-  }
+//   if( width > 13 || height > 13 ) {
+//     return imgs[0];
+//   }
 
-  Image ret = core::empty(point{0, 0}, point{width,height});
+//   Image ret = core::empty(point{0, 0}, point{width,height});
 
-  const Image topLeft = {{0, 0}, {2, 2}, {1,1,1,0}};
-  const Image topRight = {{0, 0}, {2, 2}, {1,1,0,1}};
-  const Image bottomLeft = {{0, 0}, {2, 2}, {1,0,1,1}};
-  const Image bottomRight = {{0, 0}, {2, 2}, {0,1,1,1}};
+//   const Image topLeft = {{0, 0}, {2, 2}, {1,1,1,0}};
+//   const Image topRight = {{0, 0}, {2, 2}, {1,1,0,1}};
+//   const Image bottomLeft = {{0, 0}, {2, 2}, {1,0,1,1}};
+//   const Image bottomRight = {{0, 0}, {2, 2}, {0,1,1,1}};
 
-  for (Image_ img : imgs)
-  {
-    int mask = core::colMask(img);
-    Image maskImg = core::empty(point{0, 0}, point{img.sz.x,img.sz.y});
-    for(int x = 0; x < img.sz.x; x++)
-      for(int y = 0; y < img.sz.y; y++)
-        maskImg(x,y) = img(x,y) > 0;
+//   for (Image_ img : imgs)
+//   {
+//     int mask = core::colMask(img);
+//     Image maskImg = core::empty(point{0, 0}, point{img.sz.x,img.sz.y});
+//     for(int x = 0; x < img.sz.x; x++)
+//       for(int y = 0; y < img.sz.y; y++)
+//         maskImg(x,y) = img(x,y) > 0;
 
-    if( maskImg == topLeft )
-    {
-      for(int row = 0; row < img.sz.y; row++)
-        for(int col = 0; col < img.sz.x; col++)
-          ret(row,col) = img(row,col);
-    }
-    else if( maskImg == topRight )
-    {
-      for(int row = 0; row < img.sz.y; row++)
-        for(int col = 0; col < img.sz.x; col++)
-          ret(row,col+(width-2)) = img(row,col);
-    }
-    else if( maskImg == bottomLeft )
-    {
-      for(int row = 0; row < img.sz.y; row++)
-        for(int col = 0; col < img.sz.x; col++)
-          ret(row+(height-2),col) = img(row,col);
-    }
-    else if( maskImg == bottomRight )
-    {
-      for(int row = 0; row < img.sz.y; row++)
-        for(int col = 0; col < img.sz.x; col++)
-          ret(row+(height-2),col+(width-2)) = img(row,col);
-    }
-  }
+//     if( maskImg == topLeft )
+//     {
+//       for(int row = 0; row < img.sz.y; row++)
+//         for(int col = 0; col < img.sz.x; col++)
+//           ret(row,col) = img(row,col);
+//     }
+//     else if( maskImg == topRight )
+//     {
+//       for(int row = 0; row < img.sz.y; row++)
+//         for(int col = 0; col < img.sz.x; col++)
+//           ret(row,col+(width-2)) = img(row,col);
+//     }
+//     else if( maskImg == bottomLeft )
+//     {
+//       for(int row = 0; row < img.sz.y; row++)
+//         for(int col = 0; col < img.sz.x; col++)
+//           ret(row+(height-2),col) = img(row,col);
+//     }
+//     else if( maskImg == bottomRight )
+//     {
+//       for(int row = 0; row < img.sz.y; row++)
+//         for(int col = 0; col < img.sz.x; col++)
+//           ret(row+(height-2),col+(width-2)) = img(row,col);
+//     }
+//   }
 
-  return ret;
-}
+//   return ret;
+// }
 
 Image stackLine(vImage_ shapes)
 {

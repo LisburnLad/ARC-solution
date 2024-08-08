@@ -231,6 +231,7 @@ Functions3 initFuncs3(const vector<point> &sizes)
               { return makeBorder2(img, id); });
   funcs.add("compress2", 10, compress2);
   funcs.add("compress3", 10, compress3);
+  funcs.add("composeByColor", 10, composeByColor);
 
   for (int id = 0; id < 3; id++)
     funcs.add("connect " + to_string(id), 10,
@@ -278,6 +279,7 @@ Functions3 initFuncs3(const vector<point> &sizes)
             { return cut(img); });
   funcs.add("splitCols", 10, [](Image_ img)
             { return splitCols(img); });
+  funcs.add("splitByColor", 10, splitByColor);
   funcs.add("splitAll", 10, splitAll);
   funcs.add("splitColumns", 10, splitColumns);
   funcs.add("splitRows", 10, splitRows);
@@ -402,40 +404,9 @@ void DAG::initial(Image_ test_in, const vector<pair<Image, Image>> &train, vecto
   else
     target_size = point{-1, -1};
 
+  // SGR:
   // split the training outputs into shapes and see if these shapes are common across all training outputs
-  bool matchingImageParts = (train.size()>0);
-  vImage last_img_v;
-  for (int index = 0; index < train.size(); index++)
-  {
-    vImage img_v = splitAll(train[index].second);
-    if( img_v.size() < 1 ) matchingImageParts = false;
-    else
-    {
-      if( index > 0 )
-      {
-        if( img_v.size()==last_img_v.size() )
-        {
-          for( int n = 0; n < img_v.size(); n++ )
-          {
-            // compare shapes, not colours
-            if( core::binaryCompare(img_v[n], last_img_v[n]) == false )
-            {
-              matchingImageParts = false;
-            }
-          }
-        }
-      }
-
-      last_img_v = img_v;
-    }
-  }
-
-  // test if all training outputs had the same image shapes
-  if( matchingImageParts )
-  {
-    // set the global image shapes
-    global_img_v = last_img_v;
-  }
+  FindMatchingImageParts(train);
 
   Image in = ti < train.size() ? train[ti].first : test_in;
 
@@ -450,6 +421,45 @@ void DAG::initial(Image_ test_in, const vector<pair<Image, Image>> &train, vecto
     add(State({ti != tj ? train[tj].second : core::empty(train[tj].second.sz)}, false, 10), true);
 
   givens = tiny_node.size();
+}
+
+// split the training outputs into shapes and see if these shapes are common across all training outputs
+void DAG::FindMatchingImageParts(const std::vector<std::pair<Image, Image>> &train)
+{
+  bool matchingImageParts = (train.size() > 0);
+  vImage last_img_v;
+  for (int index = 0; index < train.size(); index++)
+  {
+    vImage img_v = splitAll(train[index].second);
+    if (img_v.size() < 1)
+      matchingImageParts = false;
+    else
+    {
+      if (index > 0)
+      {
+        if (img_v.size() == last_img_v.size())
+        {
+          for (int n = 0; n < img_v.size(); n++)
+          {
+            // compare shapes, not colours
+            if (core::binaryCompare(img_v[n], last_img_v[n]) == false)
+            {
+              matchingImageParts = false;
+            }
+          }
+        }
+      }
+
+      last_img_v = img_v;
+    }
+  }
+
+  // test if all training outputs had the same image shapes
+  if (matchingImageParts)
+  {
+    // set the global image shapes
+    global_img_v = last_img_v;
+  }
 }
 
 // time each function

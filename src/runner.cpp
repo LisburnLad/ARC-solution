@@ -76,7 +76,7 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
   // These operations are currently not executed, but they hint at the possible functionalities that can be included in this function.
   // rankFeatures();
   // evalNormalizeRigid();
-  // evalTasks(0);
+  // evalTasks(2);
   // bruteSubmission();
   // bruteSolve();
   // evalEvals(1);
@@ -152,10 +152,13 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
       write(s.train[testIndex].first, "s_train_first.csv");
       write(s.train[testIndex].second, "s_train_second.csv");
 
-
-      for( int index = 0; index < train.size(); index++ ) {
-        cout << index << ". Original Input" << endl;
-        print(s.train[index].first);
+      for( int index = 0; index < train.size(); index++ )
+      {
+        if( index < s.train.size())
+        {
+          cout << index << ". Original Input" << endl;
+          print(s.train[index].first);
+        }
 
         cout << index << ". Normalised Input" << endl;
         print(train[index].first);
@@ -169,6 +172,7 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
 
       write(s.test_in, "test_in.csv");
       write(s.test_out, "test_out.csv");
+
       write(test_in, "test_in_norm.csv");
       write(test_out, "test_out_norm.csv");
     }
@@ -198,7 +202,7 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
       int sumsz = max(insumsz, outsumsz);
 
       // Log features to standard error
-      cerr << "Features: " << insumsz << ' ' << outsumsz << ' ' << macols << endl;
+      DEBUG_TRACE("Features: " << insumsz << ' ' << outsumsz << ' ' << macols << endl);
 
       // Initialize weights for estimating execution time
       double w[4] = {1.2772523019346949, 0.00655104, 0.70820414, 0.00194519};
@@ -207,7 +211,7 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
       double expect_time3 = w[0] + w[1] * sumsz + w[2] * macols + w[1] * w[2] * sumsz * macols;
 
       // Log the maximum depth to standard error
-      cerr << "MAXDEPTH: " << MAXDEPTH << endl;
+      DEBUG_TRACE("MAXDEPTH: " << MAXDEPTH << endl);
 
       // Set constants for maximum side, area, and pixels
       MAXSIDE = 100;
@@ -230,7 +234,7 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
 
       // If time logging is enabled, print the time taken to generate pieces
       if (print_times)
-        cout << "brutePieces time: " << now() - start_time << endl;
+        DEBUG_TRACE("brutePieces time: " << now() - start_time << endl);
 
       // Record start time for making pieces
       start_time = now();
@@ -240,7 +244,7 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
 
       // If time logging is enabled, print the time taken to make pieces
       if (print_times)
-        cout << "makePieces time: " << now() - start_time << endl;
+        DEBUG_TRACE("makePieces time: " << now() - start_time << endl);
     }
 
     // Check if memory logging is enabled
@@ -319,7 +323,7 @@ void runFnSearch(vector<Sample> sample, int only_sid = -1, int arg = -1, int eva
 
       // If time logging is enabled, print the time taken to compose pieces
       if (print_times)
-        cout << "composePieces time: " << now() - start_time << endl;
+        DEBUG_TRACE("composePieces time: " << now() - start_time << endl);
     }
 
     // Deduce outer products from pieces and candidates
@@ -493,12 +497,31 @@ void runSingleFile(const string &aFileName, int arg = -1)
   }
 }
 
+// void run(int only_sid = -1, int arg = -1)
+// {
+//   int eval = 1;
+
+//   string sample_dir = "evaluation";
+//   // string sample_dir = "training";
+//   int samples = -1;
+//   if (eval)
+//   {
+//     sample_dir = "test";
+//     samples = -1;
+//   }
+
+//   vector<Sample> sample = readAll(sample_dir, samples);
+//   assert(only_sid < sample.size());
+
+//   runFnSearch(sample, only_sid, arg, eval);
+// }
+
 void run(int only_sid = -1, int arg = -1)
 {
   int eval = 1;
 
-  string sample_dir = "evaluation";
-  // string sample_dir = "training";
+  // string sample_dir = "evaluation";
+  string sample_dir = "training";
   int samples = -1;
   if (eval)
   {

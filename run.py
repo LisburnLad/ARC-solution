@@ -5,6 +5,7 @@ from subprocess import call
 from concurrent.futures import ThreadPoolExecutor as Pool
 import os
 import sys
+import glob
 from random import *
 
 def count_files(directory):
@@ -12,10 +13,24 @@ def count_files(directory):
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     return len(files)
 
+def remove_txt_files(directory):
+    # Find all .txt files in the directory
+    txt_files = glob.glob(os.path.join(directory, '*.txt'))
+    # Remove each .txt file
+    for file in txt_files:
+        os.remove(file)
+        print(f"Removed {file}")
+
+# remove all previous text output files
+directories = ['store', 'store/tmp']
+for directory in directories:
+    remove_txt_files(directory)
+
+
 # Example usage
-# directory_path = 'dataset/training'
+directory_path = 'dataset/training'
 # directory_path = 'dataset/evaluation'
-directory_path = 'dataset/test'
+# directory_path = 'dataset/test'
 file_count = count_files(directory_path)
 print(f"There are {file_count} files in the directory '{directory_path}'")
 
