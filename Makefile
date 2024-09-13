@@ -2,6 +2,7 @@
 DEBUG = -Wshadow -Wall -fsanitize=address -fsanitize=undefined -D_GLIBCXX_DEBUG -g -Wno-sign-compare -Wno-shadow -Wno-char-subscripts -Wno-unused-variable
 
 FLAGS = -std=c++17 -g -O2 #-fopenmp # $(DEBUG)
+# FLAGS = -std=c++17 -O2 #-fopenmp # $(DEBUG)
 LIBS = -lstdc++ -lstdc++fs
 
 .DEFAULT_GOAL := run
