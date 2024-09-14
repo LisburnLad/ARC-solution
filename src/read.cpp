@@ -143,7 +143,7 @@ Image Sample::readImage() {
 
 
 vector<Sample> readAll(string path, int maxn) { //maxn = -1
-  const string base_path[2] = {"/kaggle/input/abstraction-and-reasoning-challenge/", "./dataset/"};
+  const string base_path[2] = {"../dataset/", "./dataset/"};
 
   int base_pathi = 0;
   while (!experimental::filesystem::exists(base_path[base_pathi]+path)) {

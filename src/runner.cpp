@@ -178,6 +178,10 @@ void run(int only_sid = -1, int arg = -1)
       MAXPIXELS = MAXAREA * 5;
     }
 
+    //
+    // Get Image Sizes
+    //
+
     // check if all train images have the same size
     point trainSize = train[0].second.sz;
     for( int index = 1; index < train.size(); index++ )
@@ -189,23 +193,16 @@ void run(int only_sid = -1, int arg = -1)
       }
     }
 
-    vector<point> out_sizes = bruteSize(test_in, train);
-
-    bool sizeMatch = false;
+    // if all the train images have the same size, use that size for the output images rather than calculating it
+    vector<point> out_sizes;
     if( trainSize != point{0, 0} )
     {
-      sizeMatch = true;
-      for( point size : out_sizes )
-      {
-        if( size != trainSize )
-        {
-          sizeMatch = false;
-          break;
-        }
-      }
+      out_sizes = vector<point>(train.size()+1, trainSize);
     }
-
-
+    else
+    {
+      out_sizes = bruteSize(test_in, train);
+    }
 
     // Generate candidate pieces
     Pieces pieces;
@@ -226,13 +223,6 @@ void run(int only_sid = -1, int arg = -1)
       double size = 0, child = 0, other = 0, inds = 0, maps = 0;
       for (DAG &d : pieces.dag)
       {
-        /*for (Node&n : d.node) {
-          for (Image_ img : n.state.vimg) {
-            size += img.mask.size();
-          }
-          child += n.child.size()*8;
-          other += sizeof(Node);
-          }*/
         other += sizeof(TinyNode) * d.tiny_node.size();
         size += 4 * d.tiny_node.bank.mem.size();
         for (TinyNode &n : d.tiny_node.node)

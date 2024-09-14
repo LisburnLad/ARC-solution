@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor as Pool
 import os
 import sys
 from random import *
+import time
 
 version = str(randint(0,10**9))
 if len(sys.argv) == 2: version = sys.argv[1]
@@ -25,6 +26,7 @@ def outdated(i):
     t = f.read()
     f.close()
     return t != version
+
 def update(i):
     fn = 'store/version/%d.txt'%i
     os.system('touch '+fn)
@@ -52,7 +54,13 @@ def run(i):
 
 call(['make','-j'])
 scores = []
+start_time = time.time()
+
 with Pool(max_workers=parallel) as executor:
     for i in executor.map(run, run_list):
         pass
+
+end_time = time.time()
+execution_time = end_time - start_time
+print("Execution time:", execution_time, "seconds")
 print("Done!       ")
