@@ -184,9 +184,9 @@ void run(int only_sid = -1, int arg = -1)
 
     // check if all train images have the same size
     point trainSize = train[0].second.sz;
-    for( int index = 1; index < train.size(); index++ )
+    for (int index = 1; index < train.size(); index++)
     {
-      if( train[index].second.sz != trainSize )
+      if (train[index].second.sz != trainSize)
       {
         trainSize = {0, 0};
         break;
@@ -195,9 +195,9 @@ void run(int only_sid = -1, int arg = -1)
 
     // if all the train images have the same size, use that size for the output images rather than calculating it
     vector<point> out_sizes;
-    if( trainSize != point{0, 0} )
+    if (trainSize != point{0, 0})
     {
-      out_sizes = vector<point>(train.size()+1, trainSize);
+      out_sizes = vector<point>(train.size() + 1, trainSize);
     }
     else
     {

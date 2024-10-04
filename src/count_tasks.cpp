@@ -8,7 +8,8 @@ using namespace std;
 #include "visu.hpp"
 #include "read.hpp"
 
-int main() {
+int main()
+{
   vector<Sample> sample = readAll("test", -1);
   cout << sample.size() << endl;
 }
